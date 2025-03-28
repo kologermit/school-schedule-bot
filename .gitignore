@@ -1,0 +1,9 @@
+*
+!.gitignore
+!docker-compose.yml
+!Dockerfile
+!bot
+!README.md
+!Makefile
+!.env.example
+!requirements.txt
