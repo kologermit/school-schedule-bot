@@ -41,7 +41,8 @@ class Message(Model):
     text =          CommonFields.text_or_null
     document =      CommonFields.string_or_null
     
-
+# Модель присланных документов в сообщениях
+# Нужно только для документов с раписанием
 class Document(Model):
     id =            CommonFields.id
     file_id =       CommonFields.string
@@ -50,6 +51,7 @@ class Document(Model):
     user =          CommonFields.user
     data =          CommonFields.json_or_null
     
+# Модель расписания
 class Schedule(Model):
     id =            CommonFields.id
     class_symbol =  CommonFields.string_or_null
@@ -58,6 +60,7 @@ class Schedule(Model):
     teacher_initials=CommonFields.string_or_null
     schedule =      CommonFields.json
     
+# Модель рассылки расписания
 class Subscribe(Model):
     id =            CommonFields.id
     user =          CommonFields.user
