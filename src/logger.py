@@ -4,6 +4,7 @@
 from os import path, environ
 from uuid import uuid4 as uuid
 from datetime import datetime
+from typing import Callable
 
 # Внешние модули
 from loguru import logger
@@ -22,7 +23,7 @@ service = None
 def init(logs_dir: str='', 
     service_name: str='defaultservice', 
     bot_token: str='', 
-    tg_admins: list[int]=[]):
+    tg_admins: list[int]=[]) -> None:
     
     # Обновление глобальных переменных
     global bot
@@ -53,13 +54,12 @@ def init(logs_dir: str='',
 # Общая функция для лога ошибки и рассылки сообщения админам
 def log_err_with_code_and_send_message(err: Exception) -> str:
     code = str(uuid())
-    logger.info(code)
-    logger.exception(err)
+    logger.exception(code, err)
     if bot:
         try:
             now = datetime.now()
-            for admin in admins[:1]:
-                bot.send_message(admin, f"{b('Произошла ошибка:')}\n"
+            if admins:
+                bot.send_message(admins[0], f"{b('Произошла ошибка:')}\n"
                     f'  {b("Сервис:")} {pre(service)}\n'
                     f'  {b("Код:")} {pre(code)}\n'
                     f'  {b("Ошибка:")} {pre(err)}\n'
@@ -69,8 +69,8 @@ def log_err_with_code_and_send_message(err: Exception) -> str:
     return code
 
 # Декоратор для отлова любых ошибок
-def log_sync_exception(f):
-    def _(*args, **kwargs):
+def log_sync_exception(f: Callable) -> Callable:
+    def _(*args, **kwargs) -> any | Exception:
         try:
             return f(*args, **kwargs)
         except Exception as err:
@@ -79,8 +79,8 @@ def log_sync_exception(f):
     return _
 
 # Декоратор для отлова любых ошибок в асинхронных функциях
-def log_async_exception(f):
-    async def _(*args, **kwargs):
+def log_async_exception(f: Callable) -> Callable:
+    async def _(*args, **kwargs) -> any | Exception:
         try:
             return await f(*args, **kwargs)
         except Exception as err:

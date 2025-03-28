@@ -19,7 +19,6 @@ bot_logs0:
 	docker compose logs --tail 0 -f bot
 bot_run:
 	docker compose up -d bot 
-	make setup_youtube_account
 	make bot_logs0
 bot_stop:
 	docker compose stop bot
