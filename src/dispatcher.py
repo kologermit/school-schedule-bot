@@ -22,11 +22,15 @@ bot_info = {
 
 # Процедура при запуске
 async def on_startup() -> None:
+    logger.info({
+        'event': 'START_BOT_POLLING', 
+        'bot': bot_info
+    })
     if BOT_ADMINS:
         await bot_async.send_message(BOT_ADMINS[0], BOT_START_MESSAGE)
 
 # Процедура инициализации
-async def init() -> None:
+def init() -> None:
     # Такое импортирование внутри процедуры нужно для замыкания
     # Чтобы не получался цикл при импортировании этого модуля
     import handlers as _
