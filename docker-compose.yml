@@ -1,0 +1,42 @@
+volumes:
+  bot-logs:
+  bot-tmp:
+  db-data:
+
+networks:
+  bot-db:
+
+services:
+  db:
+    image: postgres:${DB_VERSION:-17-alpine}
+    restart: ${RESTART:-always}
+    user: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-qwerty}
+      - POSTGRES_DB=${DB_NAME:-bot}
+      - PGDATA=/var/lib/postgresql/data
+    ports:
+      - ${DB_EXTERNAL_PORT:-127.0.0.1:5432}:5432
+    networks:
+      - bot-db
+  bot:
+    build: .
+    restart: ${RESTART:-always}
+    volumes:
+      - bot-tmp:/tmp:rw
+      - bot-logs:/logs:rw
+      - ./bot:/app:ro
+    environment:
+      - LOGS_DIR=/logs
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-qwerty}
+      - DB_NAME=${DB_NAME:-bot}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BOT_ADMINS=${BOT_ADMINS:-[]}
+    networks:
+      - bot-db
