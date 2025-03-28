@@ -1,3 +1,6 @@
+# Модуль конфига сервиса
+
+# Внутренние модули
 from modules.parse_config import parse_config_to_exec
 from modules.parse_config import json, required, summary, default, project_summary
 

@@ -38,5 +38,6 @@ services:
       - DB_PORT=5432
       - BOT_TOKEN=${BOT_TOKEN}
       - BOT_ADMINS=${BOT_ADMINS:-[]}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
     networks:
       - bot-db
