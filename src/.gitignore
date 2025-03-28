@@ -1,0 +1,7 @@
+*
+!.gitignore
+!main.py
+!logger.py
+!html_tags.py
+!modules
+!config.py

@@ -28,7 +28,7 @@ services:
     volumes:
       - bot-tmp:/tmp:rw
       - bot-logs:/logs:rw
-      - ./bot:/app:ro
+      - ./src:/app:ro
     environment:
       - LOGS_DIR=/logs
       - DB_USER=${DB_USER:-postgres}

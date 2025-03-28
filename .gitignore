@@ -2,7 +2,7 @@
 !.gitignore
 !docker-compose.yml
 !Dockerfile
-!bot
+!src
 !README.md
 !Makefile
 !.env.example
