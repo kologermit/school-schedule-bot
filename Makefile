@@ -47,8 +47,8 @@ db_force_recreate:
 	docker compose up -d --force-recreate db
 	make db_logs0
 db_remove_data:
-	docker compose rm -sfv db bot downloader
-	docker volume rm keber_data
+	docker compose rm -sfv db bot
+	docker volume rm school-schedule-bot_db-data
 	docker compose up -d db
 db_exec:
 	docker compose exec db bash

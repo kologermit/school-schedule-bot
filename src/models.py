@@ -18,6 +18,8 @@ class CommonFields:
     datetime_or_null=ORMField.DatetimeField(null=True)
     number =        ORMField.BigIntField(null=False)
     number_or_null =ORMField.BigIntField(null=True)
+    bool =          ORMField.BooleanField(null=False)
+    bool_or_null =  ORMField.BooleanField(null=True)
     text =          ORMField.TextField(null=False)
     text_or_null =  ORMField.TextField(null=True)
     user =          ORMField.ForeignKeyField('models.User', null=False)
@@ -46,6 +48,7 @@ class Message(Model):
 # Нужно только для документов с раписанием
 class Document(Model):
     id =            CommonFields.id
+    created =       CommonFields.created
     file_id =       CommonFields.string
     name =          CommonFields.string
     message =       CommonFields.message
@@ -55,15 +58,28 @@ class Document(Model):
 # Модель расписания
 class Schedule(Model):
     id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
     class_symbol =  CommonFields.string_or_null
     class_parallel =CommonFields.number_or_null
     teacher_surname=CommonFields.string_or_null
     teacher_initials=CommonFields.string_or_null
-    schedule =      CommonFields.json
+    day =           CommonFields.string
+    standart =      CommonFields.json
+    edited =        CommonFields.json_or_null
     
 # Модель рассылки расписания
 class Subscribe(Model):
     id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.created
     user =          CommonFields.user
     schedule =      CommonFields.schedule
     
+class Holidays(Model):
+    id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    is_holiday =    CommonFields.bool
+    is_weekend =    CommonFields.bool
+    summary =       CommonFields.string
