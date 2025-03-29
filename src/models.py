@@ -33,7 +33,7 @@ class User(Model):
     name =          CommonFields.string
     screen =        ORMField.CharField(null=False, default='start', max_length=1000)
     tmp_data =      CommonFields.json_or_null
-    settings =      CommonFields.json
+    settings =      CommonFields.json_or_null
     created =       CommonFields.created
     
 # Модель сообщения

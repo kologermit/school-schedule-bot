@@ -29,7 +29,6 @@ bot_restart:
 	make bot_logs0
 bot_force_recreate:
 	docker compose up -d --force-recreate --build bot
-	make setup_youtube_account
 	make bot_logs0
 bot_exec:
 	docker compose exec bot sh
@@ -67,7 +66,6 @@ all_restart:
 	make all_logs0
 all_force_recreate:
 	docker compose up -d --force-recreate --build
-	make setup_youtube_account
 	make all_logs0
 all_stop:
 	docker compose stop
