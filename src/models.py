@@ -24,7 +24,8 @@ class CommonFields:
     text_or_null =  ORMField.TextField(null=True)
     user =          ORMField.ForeignKeyField('models.User', null=False)
     message =       ORMField.ForeignKeyField('models.Message', null=False)
-    schedule =      ORMField.ForeignKeyField('models.Schedule', null=False)
+    student_class = ORMField.ForeignKeyField('models.StudentClass', null=False)
+    teacher =       ORMField.ForeignKeyField('models.Teacher', null=False)
 
 
 # Модель пользователя
@@ -55,27 +56,57 @@ class Document(Model):
     user =          CommonFields.user
     data =          CommonFields.json_or_null
     
-# Модель расписания
-class Schedule(Model):
+# Модель класса
+class StudentClass(Model):
     id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
-    class_symbol =  CommonFields.string_or_null
-    class_parallel =CommonFields.number_or_null
-    teacher_surname=CommonFields.string_or_null
-    teacher_initials=CommonFields.string_or_null
+    parallel =      CommonFields.number
+    symbol =        CommonFields.string
+    
+# Модель расписания класса
+class StudentClassSchedule(Model):
+    id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    student_class = CommonFields.student_class
     day =           CommonFields.string
     standart =      CommonFields.json
     edited =        CommonFields.json_or_null
-    
-# Модель рассылки расписания
-class Subscribe(Model):
+ 
+# Модель рассылки расписания класса   
+class StudentClassSubscribe(Model):
     id =            CommonFields.id
     created =       CommonFields.created
-    deleted =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    student_class = CommonFields.student_class
     user =          CommonFields.user
-    schedule =      CommonFields.schedule
     
+# Модель учителя
+class Teacher(Model):
+    id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    surname =       CommonFields.string
+    initials =      CommonFields.string
+    
+# Модель расписания учителя
+class TeacherSchedule(Model):
+    id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    surname =       CommonFields.string
+    initials =      CommonFields.string
+    
+# Можель рассылки расписания учителя
+class TeacherSubscribe(Model):
+    id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    teacher =       CommonFields.teacher
+    user =          CommonFields.user
+    
+# Модель каникул   
 class Holidays(Model):
     id =            CommonFields.id
     created =       CommonFields.created

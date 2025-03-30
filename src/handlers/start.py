@@ -1,4 +1,9 @@
+# Модуль с обработчиком старта
+
+# Внешние модули
 from aiogram.types import Message
+
+# Внутренние модули
 from dispatcher import dispatcher
 from .tools.handler_result import handler_result
 from .tools.filters import get_filter

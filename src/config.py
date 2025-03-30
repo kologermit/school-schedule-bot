@@ -8,6 +8,7 @@ PROJECT_NAME = 'school-schedule-bot'
 PROJECT_SUMMARY = 'Бот со школьным расписанием'
 
 LOGS_DIR='LOGS_DIR'
+TMP_DIR='TMP_DIR'
 DB_HOST='DB_HOST'
 DB_PORT='DB_PORT'
 DB_NAME='DB_NAME'
@@ -22,6 +23,7 @@ exec(parse_config_to_exec({
     LOGS_DIR: {summary: 'Путь к папке с логами. \n'
             'Если значение не задано, то лог не будет выводиться в файлы. \n'
             'По умолчанию ""', default: ''},
+    TMP_DIR: {summary: 'Папка для веременных файлов. Обязательный параметр', required: True},
     DB_HOST: {summary: 'Хост БД Postgres. По умолчанию localhost', default: 'localhost'},
     DB_PORT: {summary: 'Порт БД Postgres. По умолчанию 5432', default: '5432'},
     DB_USER: {summary: 'Имя пользователя БД. По муолчанию postgres', default: 'postgres'},

@@ -1,3 +1,5 @@
+# Модуль контекста 
+
 from models import User, Message
 
 class Context:

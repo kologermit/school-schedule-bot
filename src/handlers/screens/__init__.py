@@ -1,2 +1,4 @@
-from .start import start_screen
-from .menu import to_menu, menu_screen
+from .start import *
+from .menu import *
+from .schedule import *
+from .settings import *

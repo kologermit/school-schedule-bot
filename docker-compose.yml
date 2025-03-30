@@ -31,6 +31,7 @@ services:
       - ./src:/app:ro
     environment:
       - LOGS_DIR=/logs
+      - TMP_DIR=/tmp
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-qwerty}
       - DB_NAME=${DB_NAME:-bot}
