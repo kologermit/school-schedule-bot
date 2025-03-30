@@ -7,12 +7,13 @@ from aiogram.types import Message
 from dispatcher import dispatcher
 from .tools import handler_result
 from .tools import get_filter
-from .tools import schedule, subscribe, menu, rings
+from .tools import schedule, subscribe, menu, rings, holidays
 from .types import Context
 from .screens import menu_buttons, menu_screen, to_menu
 from .screens import to_schedule
 from .screens import to_subscribe
 from .rings import rings_handler
+from .holidays import holidays_handler
     
 @dispatcher.message(get_filter(text_list=[menu, '/menu']))
 async def cmd_menu(msg: Message, ctx: Context):
@@ -23,5 +24,6 @@ async def menu_handler(msg: Message, ctx: Context):
     return handler_result(menu_handler, await {
         schedule: to_schedule, 
         subscribe: to_subscribe,
-        rings: rings_handler
+        rings: rings_handler,
+        holidays: holidays_handler
     }[ctx.message.text](msg, ctx))

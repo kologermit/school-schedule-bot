@@ -23,10 +23,14 @@ async def rings_handler(msg: Message, ctx: Context):
     return answer
 
 
-@dispatcher.message(get_filter(pattern='^/new_rings\n((\d{2}:\d{2}-\d{2}:\d{2}\n?)+)$'))
+# /new_rings
+# 08:20-09:10
+# 09:20-10:10
+# ...
+@dispatcher.message(get_filter(pattern='^/new_rings\n((\d{2}:\d{2}-\d{2}:\d{2}\n?)+)$', admin=True))
 async def new_rings(msg: Message, ctx: Context):
     split = ctx.message.text.split('\n')
-    await Ring.all().update(deleted=datetime.now())
+    rings = []
     for line in split[1:]:
         try:
             start = time.fromisoformat(line.split('-')[0])
@@ -34,7 +38,9 @@ async def new_rings(msg: Message, ctx: Context):
         except ValueError:
             await msg.answer(answer := f'В строке {line} не правильно указано время')
             return handler_result(new_rings, answer)
-        await Ring.create(start=start, end=end)
+        rings.append(Ring(start=start, end=end))
+    await Ring.filter(deleted__isnull=True).update(deleted=datetime.now())
+    await Ring.bulk_create(rings)
     await msg.answer(answer := 'Создано расписание звонков')
     answer += await rings_handler(msg, ctx)
     return handler_result(new_rings, answer)
