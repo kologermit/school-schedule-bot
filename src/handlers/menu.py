@@ -7,13 +7,17 @@ from aiogram.types import Message
 from dispatcher import dispatcher
 from .tools import handler_result
 from .tools import get_filter
-from .tools import schedule
+from .tools import schedule, menu
 from .types import Context
-from .screens import menu_buttons, menu_screen
+from .screens import menu_buttons, menu_screen, to_menu
 from .screens import to_schedule
 
 @dispatcher.message(get_filter(screen=menu_screen, text_list=menu_buttons))
-async def menu(msg: Message, ctx: Context):
-    return handler_result(menu, await {
+async def menu_handler(msg: Message, ctx: Context):
+    return handler_result(menu_handler, await {
         schedule: to_schedule, 
     }[ctx.message.text](msg, ctx))
+    
+@dispatcher.message(get_filter(text_list=[menu, '/menu']))
+async def cmd_menu(msg: Message, ctx: Context):
+    return handler_result(cmd_menu, await to_menu(msg, ctx))
