@@ -10,7 +10,7 @@ from aiogram.types import InlineKeyboardMarkup as IMarkup
 
 back = 'Назад🔙'
 menu = 'Меню'
-schedule = 'Расписание📅'
+schedule = 'Уроки📅'
 rings = 'Звонки🔔'
 holidays = 'Каникулы🎅'
 info = 'Инфоℹ'

@@ -13,6 +13,8 @@ class CommonFields:
     date =          ORMField.DateField(null=False)
     date_or_null =  ORMField.DateField(null=False)
     datetime =      ORMField.DatetimeField(null=False)
+    time =          ORMField.TimeField(null=False)
+    time_or_null =  ORMField.TimeDeltaField(null=True)
     json =          ORMField.JSONField(null=False)
     json_or_null =  ORMField.JSONField(null=True)
     datetime_or_null=ORMField.DatetimeField(null=True)
@@ -97,7 +99,7 @@ class TeacherSchedule(Model):
     surname =       CommonFields.string
     initials =      CommonFields.string
     
-# Можель рассылки расписания учителя
+# Модель рассылки расписания учителя
 class TeacherSubscribe(Model):
     id =            CommonFields.id
     created =       CommonFields.created
@@ -105,8 +107,16 @@ class TeacherSubscribe(Model):
     teacher =       CommonFields.teacher
     user =          CommonFields.user
     
+# Можель расписания звонков
+class Ring(Model):
+    id =            CommonFields.id
+    created =       CommonFields.created
+    deleted =       CommonFields.datetime_or_null
+    start =         CommonFields.time
+    end =           CommonFields.time
+    
 # Модель каникул   
-class Holidays(Model):
+class Holiday(Model):
     id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null

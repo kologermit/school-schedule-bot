@@ -1,0 +1,40 @@
+# Модуль с обработчиком меню
+
+# Встроенные модули
+from datetime import time, datetime
+
+# Внешние модули
+from aiogram.types import Message
+
+# Внутренние модули
+from dispatcher import dispatcher
+from .tools import get_filter
+from .tools import handler_result
+from models import Ring
+from modules import b, time_template
+from .types import Context
+    
+async def rings_handler(msg: Message, ctx: Context):
+    rings = await Ring.filter(deleted__isnull=True).order_by('start')
+    answer = b("Раписание звонков:\n")+'\n'.join(
+        f'{b(i+1)}. {ring.start.strftime(time_template)}-{ring.end.strftime(time_template)}'
+        for i, ring in enumerate(rings))
+    await msg.answer(answer)
+    return answer
+
+
+@dispatcher.message(get_filter(pattern='^/new_rings\n((\d{2}:\d{2}-\d{2}:\d{2}\n?)+)$'))
+async def new_rings(msg: Message, ctx: Context):
+    split = ctx.message.text.split('\n')
+    await Ring.all().update(deleted=datetime.now())
+    for line in split[1:]:
+        try:
+            start = time.fromisoformat(line.split('-')[0])
+            end = time.fromisoformat(line.split('-')[1])
+        except ValueError:
+            await msg.answer(answer := f'В строке {line} не правильно указано время')
+            return handler_result(new_rings, answer)
+        await Ring.create(start=start, end=end)
+    await msg.answer(answer := 'Создано расписание звонков')
+    answer += await rings_handler(msg, ctx)
+    return handler_result(new_rings, answer)
