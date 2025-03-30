@@ -8,14 +8,16 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.types import InlineKeyboardButton as IButton
 from aiogram.types import InlineKeyboardMarkup as IMarkup
 
-back = '🔙Назад'
+back = 'Назад🔙'
 menu = 'Меню'
 schedule = 'Расписание📅'
 rings = 'Звонки🔔'
 holidays = 'Каникулы🎅'
 info = 'Инфоℹ'
+add = 'Добавить🆕'
+delete = 'Удалить❌'
 ph_culture = 'Где ФК?⚽'
-settings = 'Настройки⚙️'
+subscribe = 'Рассылка расписания📩'
 
 
 def list_to_keyboard(btns: list[list[str]]):

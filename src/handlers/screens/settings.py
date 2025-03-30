@@ -1,2 +1,0 @@
-
-settings_screen = 'settings'

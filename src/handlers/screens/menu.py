@@ -12,20 +12,21 @@ from handlers.tools.buttons import (
     holidays,
     info,
     ph_culture,
-    settings,
+    subscribe,
     menu
 )
 
 menu_screen = 'menu'
 menu_buttons = [
     schedule, rings, holidays,
-    info, ph_culture, settings,
+    info, ph_culture, subscribe,
     menu
 ]
+
 menu_keyboard = list_to_keyboard([
     menu_buttons[0:3],
     menu_buttons[3:6],
-    menu_buttons[6:7]
+    menu_buttons[6:7],
 ])
 
 # Процедура перехода в меню

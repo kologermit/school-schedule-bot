@@ -6,8 +6,8 @@ from aiogram.types import Message
 # Внутренние модули
 from handlers.types import Context
 from handlers.tools import menu, back, list_to_keyboard
-from handlers.tools import handler_result
 from models import StudentClass
+
 schedule_screen = 'schedule'
 
 # Процедура перехода в меню
