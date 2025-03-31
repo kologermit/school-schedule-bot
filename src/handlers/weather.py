@@ -28,7 +28,7 @@ async def weather_handler(msg: Message, ctx: Context):
             WeatherEnum.CLOUDS: b('На улице облачно.\nДумаю, что скоро может нагрянуть дождь'),
             WeatherEnum.CLEAR: b('Небо чисто\nПочему бы и не погулять?'),
             WeatherEnum.PARTY_CLOUD: b('Немного облачно\nПочему бы и не погулять?'),
-        }.get(weather.weater, b('Даже не знаю, что за погода на улице, но за окном'))
+        }.get(weather.weater, b('Даже не знаю, что за погода'))
     answer += f'\nНа улице {b(floor(weather.temperature))}°C'
     await msg.answer(answer)
     return answer
