@@ -2,7 +2,6 @@ from aiogram.types import Message
 from asyncio import Lock
 from loguru import logger
 from models import User
-from config import BOT_ADMINS
 from handlers.screens import start_screen
 
 user_locks = {}

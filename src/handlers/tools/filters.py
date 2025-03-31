@@ -8,7 +8,7 @@ from aiogram.types import Message
 from aiogram.enums.chat_type import ChatType
 
 # Внутренние модули
-from logger import log_async_exception, logger
+from logger import log_async_exception
 from .user import get_user_by_msg
 from config import BOT_ADMINS
 
