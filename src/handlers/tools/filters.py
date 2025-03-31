@@ -16,14 +16,20 @@ from config import BOT_ADMINS
 def get_filter(
     text="",
     text_list: list[str]=[],
+    text_upper=True,
     pattern="",
     screen="",
     screen_list: list[str]=[],
     admin=False
 ) -> Awaitable:
+    if text_upper:
+        text = text.upper()
+        text_list = list(map(lambda t: t.upper(), text_list))
     @log_async_exception
     async def filt(msg: Message, **_) -> bool:
         msg_text = str(msg.text).strip()
+        if text_upper:
+            msg_text = msg_text.upper()
         user = await get_user_by_msg(msg)
         return (
             msg.chat.type in [ChatType.PRIVATE.value, ChatType.SENDER.value]

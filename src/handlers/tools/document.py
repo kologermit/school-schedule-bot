@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Внешение модули
 from aiogram.types import Message
-from openpyxl import load_workbook as open_xlsx, Workbook
+from openpyxl import load_workbook as open_xlsx
 from openpyxl.worksheet.worksheet import Worksheet
 from xlrd import open_workbook as open_xls
 
@@ -27,7 +27,6 @@ async def get_document_by_msg(msg: Message) -> Document:
         user_id=msg.from_user.id,
         path=file_path,
     )
-    await Message.filter(id=msg.message_id, user_id=msg.from_user.id).update(document_id=document.id)
     return document
 
 def get_sheet_by_document(document: Document) -> Worksheet:

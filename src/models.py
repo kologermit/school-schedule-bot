@@ -6,7 +6,6 @@ from tortoise import fields as ORMField
 
 # Часто встречающиеся типы. Класс используется только для создания моделей
 class CommonFields:
-    id =            ORMField.BigIntField(pk=True, null=False)
     string =        ORMField.CharField(max_length=1000, null=False)
     string_or_null= ORMField.CharField(max_length=1000, null=True)
     created =       ORMField.DatetimeField(auto_now=True, null=False)
@@ -32,7 +31,6 @@ class CommonFields:
 
 # Модель пользователя
 class User(Model):
-    id =            CommonFields.id
     name =          CommonFields.string
     screen =        ORMField.CharField(null=False, default='start', max_length=1000)
     tmp_data =      CommonFields.json_or_null
@@ -40,7 +38,6 @@ class User(Model):
     
 # Модель сообщения
 class Message(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     user =          CommonFields.user
     text =          CommonFields.text_or_null
@@ -49,7 +46,6 @@ class Message(Model):
 # Модель присланных документов в сообщениях
 # Нужно только для документов с раписанием
 class Document(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     file_id =       CommonFields.string
     name =          CommonFields.string
@@ -59,7 +55,6 @@ class Document(Model):
     
 # Модель класса
 class StudentClass(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     parallel =      CommonFields.number
@@ -71,7 +66,6 @@ class StudentClass(Model):
     
 # Модель расписания класса
 class StudentClassSchedule(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     student_class = CommonFields.student_class
@@ -81,7 +75,6 @@ class StudentClassSchedule(Model):
  
 # Модель рассылки расписания класса   
 class StudentClassSubscribe(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     student_class = CommonFields.student_class
@@ -89,7 +82,6 @@ class StudentClassSubscribe(Model):
     
 # Модель учителя
 class Teacher(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     surname =       CommonFields.string
@@ -97,7 +89,6 @@ class Teacher(Model):
     
 # Модель расписания учителя
 class TeacherSchedule(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     surname =       CommonFields.string
@@ -107,7 +98,6 @@ class TeacherSchedule(Model):
     
 # Модель рассылки расписания учителя
 class TeacherSubscribe(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     teacher =       CommonFields.teacher
@@ -115,7 +105,6 @@ class TeacherSubscribe(Model):
     
 # Можель расписания звонков
 class Ring(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     start =         CommonFields.time
@@ -123,7 +112,6 @@ class Ring(Model):
     
 # Модель каникул   
 class Holiday(Model):
-    id =            CommonFields.id
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     is_holiday =    CommonFields.bool

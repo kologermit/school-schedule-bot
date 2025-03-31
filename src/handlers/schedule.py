@@ -8,6 +8,7 @@ from copy import deepcopy
 # Вешние модули
 from aiogram.types import Message
 from aiogram.exceptions import TelegramBadRequest
+from loguru import logger
 
 # Внутренние модули
 from dispatcher import dispatcher, bot_async
@@ -15,11 +16,12 @@ from .tools import get_filter, handler_result
 from .tools import get_document_by_msg, get_sheet_by_document
 from .types import Context, ScheduleTypeEnum, WeekdayEnum, UpdateResult
 from .tools import list_to_keyboard, schedule
+from .menu import to_menu
 from models import StudentClass, StudentClassSchedule, StudentClassSubscribe
 from modules import b
 from logger import log_async_exception
 
-schedule_screen = 'schedule'
+schedule_screen = 'schedule:class'
 
 # Процедура перехода в меню
 @dispatcher.message(get_filter(text=schedule))
@@ -48,6 +50,75 @@ all_student_class_variants: set[str] = set()
 for parallel in range(5, 12):
     for symbol in all_russian_symbols:
         all_student_class_variants.add(f'{parallel}{symbol}')
+        
+        
+schedule_screen_weekday = 'schedule:weekday'
+@dispatcher.message(get_filter(screen=schedule_screen, text_list=all_student_class_variants))
+async def to_weekday(msg: Message, ctx: Context):
+    parallel = ctx.message.text[:-1]
+    symbol = ctx.message.text[-1]
+    student_class = await StudentClass.get_or_none(
+        deleted__isnull=True,
+        parallel=parallel,
+        symbol=symbol,
+    )
+    if student_class is None:
+        await msg.answer(answer := 'Класс не найден!')
+        return handler_result(to_weekday, answer)
+    ctx.user.screen = schedule_screen_weekday
+    ctx.user.tmp_data = {'parallel': parallel, 'symbol': symbol}
+    list_rus = list(map(lambda t: t.title(), WeekdayEnum.list_rus))
+    
+    await msg.answer(answer := b('Выбери нень недели'), reply_markup=list_to_keyboard([
+        list_rus[0:3],
+        list_rus[3:6],
+        list_rus[6:7]
+    ]))
+    
+
+@dispatcher.message(get_filter(screen=schedule_screen_weekday, text_list=WeekdayEnum.dict))
+async def send_schedule(msg: Message, ctx: Context, weekday=None):
+    if not weekday:
+        weekday = WeekdayEnum.dict[ctx.message.text.upper()]
+    else:
+        weekday = WeekdayEnum.dict[weekday]
+    logger.info({'weekday': weekday, 'parallel': ctx.user.tmp_data['parallel'], 'symbol': ctx.user.tmp_data['symbol']})
+    student_class = await StudentClass.get_or_none(
+        deleted__isnull=True,
+        parallel=ctx.user.tmp_data['parallel'],
+        symbol=ctx.user.tmp_data['symbol']
+    )
+    if student_class is None:
+        return await to_menu(msg, ctx, b('Класс не найден!'))
+
+    schedule_list = await StudentClassSchedule.filter(
+        deleted__isnull=True,
+        student_class_id=student_class.id,
+        **({} if weekday == WeekdayEnum.ALL_DAYS else {"weekday": weekday})
+    )
+    schedule_list = sorted(schedule_list, key=lambda sc: WeekdayEnum.list.index(sc.weekday))
+    schedule_list = sorted(schedule_list, key=lambda sc: sc.type, reverse=True)
+    if not schedule_list:
+        answer = b('Расписание не найдено!')
+    else:
+        answer = '\n\n'.join(schedule_template(
+            student_class, schedule) for schedule in schedule_list)
+    return await to_menu(msg, ctx, answer)
+
+async def filter_cmd_send_schedule(msg: Message) -> bool:
+    return (
+        len(split := msg.text.strip().upper().split(' ')) >= 2
+        and split[0] in all_student_class_variants
+        and ' '.join(split[1:]) in WeekdayEnum.dict
+    )
+@dispatcher.message(filter_cmd_send_schedule)
+async def cmd_send_result(msg: Message, ctx: Context):
+    split = ctx.message.text.upper().split(' ')
+    parallel = split[0][:-1]
+    symbol = split[0][-1]
+    ctx.user.tmp_data[schedule_screen] = {'parallel': parallel, 'symbol': symbol}
+    return await send_schedule(msg, ctx, ' '.join(split[1:]))
+    
 
 @log_async_exception
 async def filter_update_schedule(msg: Message, **_) -> bool:
