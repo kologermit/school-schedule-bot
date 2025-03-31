@@ -9,7 +9,6 @@ from loguru import logger
 
 # Внутренние модули
 from models import User
-from handlers.screens import start_screen
 
 user_locks = {}
 user_cached = {}
@@ -26,7 +25,7 @@ async def get_user_by_msg(msg: Message) -> User:
             user = await User.create(
                 id=msg.from_user.id,
                 name=msg.from_user.full_name,
-                screen=start_screen,
+                screen='start',
             )
             logger.info({
                 'event': 'NEW_USER',

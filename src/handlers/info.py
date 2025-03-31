@@ -4,12 +4,15 @@
 from aiogram.types import Message
 
 # Внутренние модули
+from dispatcher import dispatcher
+from .tools import get_filter, handler_result
 from .types import Context
 from .tools import schedule, rings, info, weather, holidays, subscribe
 from .tools import cmd_new_weekends, cmd_new_rings, cmd_new_holidays, cmd_menu, cmd_start
 from modules import b
 from config import BOT_ADMINS
     
+@dispatcher.message(get_filter(text=info))
 async def info_handler(msg: Message, ctx: Context):
     await msg.answer(answer := 
         f'{b("Кнопки для пользования ботом:")}\n'
@@ -33,5 +36,5 @@ async def info_handler(msg: Message, ctx: Context):
         )
         answer += text
         await msg.answer(text)
-    return answer
+    return handler_result(info_handler, answer)
     

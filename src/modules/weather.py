@@ -13,10 +13,10 @@ class WeatherEnum:
     PARTY_CLOUD = 'Party Cloud'
         
 class Weather:
-    weater: str
+    weather: str
     temperature: float
     def __init__(self, weather: str, temperature: float):
-        self.weater = deepcopy(weather)
+        self.weather = deepcopy(weather)
         self.temperature = deepcopy(temperature)
 
 class WeatherAPI:

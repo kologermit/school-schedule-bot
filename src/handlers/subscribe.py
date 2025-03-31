@@ -1,17 +1,22 @@
-# Модуль перехода в меню
+# Модуль перехода в рассылку
 
 # Вешние модули
 from aiogram.types import Message
 
 # Внутренние модули
-from handlers.types import Context
-from handlers.tools import menu, back, list_to_keyboard
-from handlers.tools import add, delete
+from dispatcher import dispatcher
+from .types import Context
+from .tools import get_filter, handler_result
+from .tools import list_to_keyboard
+from .tools import add, delete, subscribe
 from models import StudentClassSubscribe, StudentClass
+from modules import b
 
 subscribe_screen = 'subscribe'
 
 # Процедура перехода в меню
+
+@dispatcher.message(get_filter(text=subscribe))
 async def to_subscribe(msg: Message, ctx: Context) -> str:
     ctx.user.screen = subscribe_screen
     
@@ -24,15 +29,14 @@ async def to_subscribe(msg: Message, ctx: Context) -> str:
         deleted__isnull=True
     )
     
-    answer = 'Вы не подписаны на расписание'
+    answer = b('Вы не подписаны на расписание')
     if student_classes:
-        answer = 'Вы получаете раписание:\n'+ \
+        answer = b('Вы получаете раписание:\n') + \
             '\n'.join(f'{i+1}. {sc.parallel}{sc.symbol}' for i, sc in enumerate(student_classes))
     
     
     await msg.answer(answer, reply_markup=list_to_keyboard([
         [add, delete],
-        [back, menu],
     ]))
-    return answer
+    return handler_result(to_subscribe, answer)
 

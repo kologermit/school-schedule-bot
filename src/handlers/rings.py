@@ -11,16 +11,18 @@ from dispatcher import dispatcher
 from models import Ring
 from modules import b, time_template
 from .tools import get_filter, handler_result
-from .tools import cmd_new_rings
+from .tools import cmd_new_rings, rings
 from .types import Context
     
+    
+@dispatcher.message(get_filter(text=rings))
 async def rings_handler(msg: Message, ctx: Context):
     rings = await Ring.filter(deleted__isnull=True).order_by('start')
     answer = b("Раписание звонков:\n")+'\n'.join(
         f'{b(i+1)}. {ring.start.strftime(time_template)}-{ring.end.strftime(time_template)}'
         for i, ring in enumerate(rings))
     await msg.answer(answer)
-    return answer
+    return handler_result(rings_handler, answer)
 
 
 # /new_rings

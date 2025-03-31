@@ -26,6 +26,7 @@ subscribe = 'Рассылка расписания📩'
 
 
 def list_to_keyboard(btns: list[list[str]]):
+    btns.append([menu])
     for i, list_btns in enumerate(deepcopy(btns)):
         for j, btn in enumerate(list_btns):
             btns[i][j] = KeyboardButton(text=btn)

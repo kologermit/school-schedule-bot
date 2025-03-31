@@ -9,11 +9,12 @@ from aiogram.types import Message
 # Внутренние модули
 from dispatcher import dispatcher
 from .tools import get_filter, handler_result
-from .tools import cmd_new_holidays, cmd_new_weekends
+from .tools import cmd_new_holidays, cmd_new_weekends, holidays
 from models import Holiday
 from modules import b
 from .types import Context
     
+@dispatcher.message(get_filter(text=holidays))
 async def holidays_handler(msg: Message, ctx: Context):
     holidays = await Holiday.filter(deleted__isnull=True, is_holiday=True).order_by('id')
     weekends = await Holiday.filter(deleted__isnull=True, is_weekend=True).order_by('id')
@@ -23,7 +24,7 @@ async def holidays_handler(msg: Message, ctx: Context):
         +'\n'.join(f'{b(i+1)}. {holiday.summary}' for i, holiday in enumerate(weekends))
     )
     await msg.answer(answer)
-    return answer
+    return handler_result(holidays_handler, answer)
 
 
 # /new_holidays или /new_weekends

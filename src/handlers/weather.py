@@ -8,17 +8,20 @@ from datetime import date
 from aiogram.types import Message
 
 # Внутренние модули
+from dispatcher import dispatcher
 from .types import Context
+from .tools import get_filter, handler_result, weather
 from modules import WeatherAPI, b, WeatherEnum
 from config import WEATHER_API_KEY
 
 weather_api = WeatherAPI(WEATHER_API_KEY, 56.875299, 53.219367)
     
+@dispatcher.message(get_filter(text=weather))
 async def weather_handler(msg: Message, ctx: Context):
-    weather = await weather_api.fetch()
+    weather_result = await weather_api.fetch()
     month = date.today().month
     if month in [1, 2, 3, 12]:
-        if weather.temperature >= -15:
+        if weather_result.temperature >= -15:
             answer = b('Похоже, что на улице зима')
         else:
             answer = b('В такой мороз лучше не гулять')
@@ -28,8 +31,8 @@ async def weather_handler(msg: Message, ctx: Context):
             WeatherEnum.CLOUDS: b('На улице облачно.\nДумаю, что скоро может нагрянуть дождь'),
             WeatherEnum.CLEAR: b('Небо чисто\nПочему бы и не погулять?'),
             WeatherEnum.PARTY_CLOUD: b('Немного облачно\nПочему бы и не погулять?'),
-        }.get(weather.weater, b('Даже не знаю, что за погода'))
-    answer += f'\nНа улице {b(floor(weather.temperature))}°C'
+        }.get(weather_result.weather, b('Даже не знаю, что за погода'))
+    answer += f'\nНа улице {b(floor(weather_result.temperature))}°C'
     await msg.answer(answer)
-    return answer
+    return handler_result(weather_handler, answer)
     

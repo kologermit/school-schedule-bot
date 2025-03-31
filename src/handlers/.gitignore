@@ -2,8 +2,6 @@
 !.gitignore
 !middleware.py
 !tools
-!screens
-!start.py
 !__init__.py
 !types
 !menu.py
@@ -12,3 +10,5 @@
 !holidays.py
 !info.py
 !weather.py
+!schedule.py
+!subscribe.py
