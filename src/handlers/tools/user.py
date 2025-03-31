@@ -1,6 +1,13 @@
-from aiogram.types import Message
+# Модуль работы с пользователем
+
+# Встроенные модули
 from asyncio import Lock
+
+# Внешние модули
+from aiogram.types import Message
 from loguru import logger
+
+# Внутренние модули
 from models import User
 from handlers.screens import start_screen
 

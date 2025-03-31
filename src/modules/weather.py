@@ -1,5 +1,10 @@
-from aiohttp import ClientSession
+# Модуль запросов в OpenWeatherApi
+
+# Встроенные модули
 from copy import deepcopy
+
+# Внешние модули
+from aiohttp import ClientSession
 
 class WeatherEnum:
     RAIN = 'Rain'
@@ -9,14 +14,10 @@ class WeatherEnum:
         
 class Weather:
     weater: str
-    description: str
     temperature: float
-    wind_speed: float
-    def __init__(self, weather: str, description: str, temperature: float, wind_speed: float):
+    def __init__(self, weather: str, temperature: float):
         self.weater = deepcopy(weather)
-        self.description = deepcopy(description)
         self.temperature = deepcopy(temperature)
-        self.wind_speed = deepcopy(wind_speed)
 
 class WeatherAPI:
     api_key: str
@@ -44,9 +45,7 @@ class WeatherAPI:
                     if data["cod"] == 200:
                         return Weather(
                             weather=data["weather"][0]["main"],
-                            description=data["weather"][0]["description"],
                             temperature=data["main"]["temp"],
-                            wind_speed=data["wind"]["speed"]
                         )
                     else:
                         raise ValueError(f'Ошибка API: {data["message"]}')

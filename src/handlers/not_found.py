@@ -5,8 +5,7 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .tools.filters import get_filter
-from .tools.handler_result import handler_result
+from .tools import get_filter, handler_result
 
 # Последний возможный обработчик с ответом пользователю
 @dispatcher.message(get_filter())

@@ -5,13 +5,11 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .tools import handler_result
-from .tools import get_filter
+from .tools import handler_result, get_filter
 from .tools import schedule, subscribe, menu, rings, holidays, info, weather
 from .types import Context
 from .screens import menu_buttons, menu_screen, to_menu
-from .screens import to_schedule
-from .screens import to_subscribe
+from .screens import to_schedule, to_subscribe
 from .rings import rings_handler
 from .holidays import holidays_handler
 from .info import info_handler

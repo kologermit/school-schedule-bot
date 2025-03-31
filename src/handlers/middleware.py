@@ -9,12 +9,13 @@ from typing import Awaitable, Callable
 # Внешние модули
 from aiogram.types import TelegramObject
 from aiogram.types import Message as TGMessage
+from loguru import logger
 
 # Внутренние модули
 from .tools.user import get_user_by_msg
 from .types import Context
 from models import Message
-from logger import log_async_exception, logger
+from logger import log_async_exception
 from dispatcher import dispatcher, bot_async
 
 # Общий мидлвар

@@ -8,10 +8,9 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .tools import get_filter
-from .tools import handler_result
 from models import Ring
 from modules import b, time_template
+from .tools import get_filter, handler_result
 from .types import Context
     
 async def rings_handler(msg: Message, ctx: Context):
