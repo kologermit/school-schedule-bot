@@ -20,13 +20,15 @@ async def get_document_by_msg(msg: Message) -> Document:
     file_id = msg.document.file_id
     file_path = path.join(TMP_DIR, file_id+Path(file_name).suffix)
     await bot_async.download(file_id, file_path)
-    return await Document.create(
+    document = await Document.create(
         name=file_name,
         file_id=file_id,
         message_id=msg.message_id,
         user_id=msg.from_user.id,
         path=file_path,
     )
+    await Message.filter(id=msg.message_id, user_id=msg.from_user.id).update(document_id=document.id)
+    return document
 
 def get_sheet_by_document(document: Document) -> Worksheet:
     return (
