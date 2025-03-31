@@ -2,6 +2,7 @@
 
 # Встроенные модули
 from re import match
+from typing import Awaitable
 
 # Внешнеи модули
 from aiogram.types import Message
@@ -19,7 +20,7 @@ def get_filter(
     screen="",
     screen_list: list[str]=[],
     admin=False
-):
+) -> Awaitable:
     @log_async_exception
     async def filt(msg: Message, **_) -> bool:
         msg_text = str(msg.text).strip()

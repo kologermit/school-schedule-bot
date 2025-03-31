@@ -70,7 +70,7 @@ def log_err_with_code_and_send_message(err: Exception) -> str:
 
 # Декоратор для отлова любых ошибок
 def log_sync_exception(f: Callable) -> Callable:
-    def _(*args, **kwargs) -> any:
+    def _(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except Exception as err:
@@ -80,7 +80,7 @@ def log_sync_exception(f: Callable) -> Callable:
 
 # Декоратор для отлова любых ошибок в асинхронных функциях
 def log_async_exception(f: Callable) -> Callable:
-    async def _(*args, **kwargs) -> any:
+    async def _(*args, **kwargs):
         try:
             return await f(*args, **kwargs)
         except Exception as err:

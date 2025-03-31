@@ -1,0 +1,27 @@
+def dz(a: str, b: str): return dict(zip(a, b))
+
+class WeekdayEnum:
+    
+    MONDAY =    'MONDAY'
+    TUESDAY =   'TUESDAY'
+    WEDNESDAY = 'WEDNESDAY'
+    THURSDAY =  'THURSDAY'
+    FRIDAY =    'FRIDAY'
+    SATURDAY =  'SATURDAY'
+    
+    RUS_MONDAY =    'ПОНЕДЕЛЬНИК'
+    RUS_TUESDAY =   'ВТОРНИК'
+    RUS_WEDNESDAY = 'СРЕДА'
+    RUS_THURSDAY =  'ЧЕТВЕРГ'
+    RUS_FRIDAY =    'ПЯТНИЦА'
+    RUS_SATURDAY =  'СУББОТА'
+    
+    list = [MONDAY , TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY]
+    list_rus = [RUS_MONDAY, RUS_TUESDAY, RUS_WEDNESDAY, RUS_THURSDAY, RUS_FRIDAY, RUS_SATURDAY]
+    dict = {
+        **dz(('ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'), list),
+        **dz(list_rus, list),
+        **dz([str(i) for i in range(1, 7)], list),
+        **dz(list, list),
+    }
+    dict_rus = dz(list, list_rus)

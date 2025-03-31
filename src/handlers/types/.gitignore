@@ -2,3 +2,5 @@
 !.gitignore
 !Context.py
 !__init__.py
+!WeekdayEnum.py
+!ScheduleTypeEnum.py

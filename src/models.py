@@ -55,7 +55,7 @@ class Document(Model):
     name =          CommonFields.string
     message =       CommonFields.message
     user =          CommonFields.user
-    data =          CommonFields.json_or_null
+    path =          CommonFields.string
     
 # Модель класса
 class StudentClass(Model):
@@ -64,6 +64,10 @@ class StudentClass(Model):
     deleted =       CommonFields.datetime_or_null
     parallel =      CommonFields.number
     symbol =        CommonFields.string
+    def __str__(self):
+        return f'{self.parallel}{self.symbol}'
+    def __repr__(self):
+        return f'<StuidentClass: {self.id}, {self}'
     
 # Модель расписания класса
 class StudentClassSchedule(Model):
@@ -71,9 +75,9 @@ class StudentClassSchedule(Model):
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     student_class = CommonFields.student_class
-    day =           CommonFields.string
-    standart =      CommonFields.json
-    edited =        CommonFields.json_or_null
+    weekday =       CommonFields.string
+    data =          CommonFields.json
+    type =          CommonFields.string
  
 # Модель рассылки расписания класса   
 class StudentClassSubscribe(Model):
@@ -98,6 +102,8 @@ class TeacherSchedule(Model):
     deleted =       CommonFields.datetime_or_null
     surname =       CommonFields.string
     initials =      CommonFields.string
+    day =           CommonFields.number
+    is_standart =   CommonFields.bool
     
 # Модель рассылки расписания учителя
 class TeacherSubscribe(Model):
@@ -121,5 +127,4 @@ class Holiday(Model):
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
     is_holiday =    CommonFields.bool
-    is_weekend =    CommonFields.bool
     summary =       CommonFields.string

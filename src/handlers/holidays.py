@@ -40,7 +40,6 @@ async def new_holidays(msg: Message, ctx: Context):
         map(lambda line: Holiday(
             summary=line, 
             is_holiday=is_holidays,
-            is_weekend=not is_holidays,
         ), split[1:]))
     await msg.answer(answer := 'Каникулы обновлены')
     answer += await holidays_handler(msg, ctx)
