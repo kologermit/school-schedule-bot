@@ -13,7 +13,7 @@ from aiogram.exceptions import TelegramBadRequest
 from dispatcher import dispatcher, bot_async
 from .tools import get_filter, handler_result
 from .tools import get_document_by_msg, get_sheet_by_document
-from .types import Context, ScheduleTypeEnum, WeekdayEnum
+from .types import Context, ScheduleTypeEnum, WeekdayEnum, UpdateResult
 from .tools import list_to_keyboard, schedule
 from models import StudentClass, StudentClassSchedule, StudentClassSubscribe
 from modules import b
@@ -34,11 +34,6 @@ async def to_schedule(msg: Message, ctx: Context) -> str:
 
 def schedule_template(student_class: StudentClass, schedule: StudentClassSchedule) -> str:
     data: list[str] = schedule.data
-    data = [
-        (lesson if lesson else '-') 
-        for i, lesson in enumerate(data) 
-        if list(filter(bool, data[i:]))
-    ]
     if not data:
         data = ['-']*6
     return (
@@ -99,13 +94,6 @@ async def update_schedule(msg: Message, ctx: Context):
                 )
             student_class_coords[(x, y)] = student_class
     
-    class UpdateResult:
-        count_subscribers: int
-        count_lessons: int
-        def __init__(self, count_subscribers: int, count_lessons: int):
-            self.count_subscribers = deepcopy(count_subscribers)
-            self.count_lessons = deepcopy(count_lessons)
-            
     results: dict[str, UpdateResult] = {}
     
     for key, student_class in student_class_coords.items():
@@ -122,6 +110,11 @@ async def update_schedule(msg: Message, ctx: Context):
                 schedule_list[-1] = value1
             if len(value2) > 4:
                 schedule_list[-1] = value2
+        schedule_list = [
+            (lesson if lesson else '-') 
+            for i, lesson in enumerate(schedule_list) 
+            if list(filter(bool, schedule_list[i:]))
+        ]
         await StudentClassSchedule.filter(
             deleted__isnull=True,
             student_class_id=student_class.id,
@@ -144,5 +137,14 @@ async def update_schedule(msg: Message, ctx: Context):
                 await bot_async.send_message(subscriber.user_id, text)
             except TelegramBadRequest:
                 continue
-
-    await msg.answer('filtered')
+        results[str(student_class)] = UpdateResult(
+            len(subscribers),
+            len(schedule.data),
+        )
+    answer = (
+        b(f'Отчёт по рассылке {document.name}:\n')
+        +'\n'.join(f'- {student_class} - Уроков: {result.count_lessons} - Подписок: {result.count_subscribers}' 
+            for student_class, result in results.items())
+    )
+    await msg.reply(answer)
+    return handler_result(update_schedule, answer)
