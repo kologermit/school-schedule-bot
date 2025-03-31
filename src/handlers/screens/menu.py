@@ -11,7 +11,7 @@ from handlers.tools.buttons import (
     rings,
     holidays,
     info,
-    ph_culture,
+    weather,
     subscribe,
     menu
 )
@@ -19,7 +19,7 @@ from handlers.tools.buttons import (
 menu_screen = 'menu'
 menu_buttons = [
     schedule, rings, holidays,
-    info, ph_culture, subscribe,
+    info, weather, subscribe,
     menu
 ]
 

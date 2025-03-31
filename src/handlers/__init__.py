@@ -5,4 +5,5 @@ from .info import *
 from .middleware import *
 from .rings import *
 from .holidays import *
+from .weather import *
 from .not_found import *

@@ -16,7 +16,7 @@ holidays = 'Каникулы🎅'
 info = 'Инфоℹ'
 add = 'Добавить🆕'
 delete = 'Удалить❌'
-ph_culture = 'Где ФК?⚽'
+weather = 'Погода☂️'
 subscribe = 'Рассылка расписания📩'
 
 
