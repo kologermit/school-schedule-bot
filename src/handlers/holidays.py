@@ -8,10 +8,10 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .tools import get_filter
-from .tools import handler_result
+from .tools import get_filter, handler_result
+from .tools import cmd_new_holidays, cmd_new_weekends
 from models import Holiday
-from modules import b, time_template
+from modules import b
 from .types import Context
     
 async def holidays_handler(msg: Message, ctx: Context):
@@ -30,10 +30,10 @@ async def holidays_handler(msg: Message, ctx: Context):
 # Праздники1
 # Праздники2
 # ...
-@dispatcher.message(get_filter(pattern='^/(new_holidays|new_weekends).*', admin=True))
+@dispatcher.message(get_filter(pattern=f'^({cmd_new_holidays}|{cmd_new_weekends}).*', admin=True))
 async def new_holidays(msg: Message, ctx: Context):
     split = ctx.message.text.split('\n')
-    is_holidays = 'new_holidays' in split[0]
+    is_holidays = cmd_new_holidays in split[0]
     await Holiday.filter(is_holiday=is_holidays, deleted__isnull=True).update(deleted=datetime.now())
     await Holiday.bulk_create(
         map(lambda line: Holiday(

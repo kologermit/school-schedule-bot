@@ -8,11 +8,16 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.types import InlineKeyboardButton as IButton
 from aiogram.types import InlineKeyboardMarkup as IMarkup
 
+cmd_start = '/start'
 back = 'Назад🔙'
 menu = 'Меню'
+cmd_menu = '/menu'
 schedule = 'Уроки📅'
 rings = 'Звонки🔔'
+cmd_new_rings = '/new_rings'
 holidays = 'Каникулы🎅'
+cmd_new_holidays = '/new_holidays'
+cmd_new_weekends = '/new_weekends'
 info = 'Информацияℹ'
 add = 'Добавить🆕'
 delete = 'Удалить❌'

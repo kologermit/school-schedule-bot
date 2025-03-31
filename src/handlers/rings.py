@@ -11,6 +11,7 @@ from dispatcher import dispatcher
 from models import Ring
 from modules import b, time_template
 from .tools import get_filter, handler_result
+from .tools import cmd_new_rings
 from .types import Context
     
 async def rings_handler(msg: Message, ctx: Context):
@@ -26,7 +27,7 @@ async def rings_handler(msg: Message, ctx: Context):
 # 08:20-09:10
 # 09:20-10:10
 # ...
-@dispatcher.message(get_filter(pattern='^/new_rings\n((\d{2}:\d{2}-\d{2}:\d{2}\n?)+)$', admin=True))
+@dispatcher.message(get_filter(pattern=f'^{cmd_new_rings}\n((\d{2}:\d{2}-\d{2}:\d{2}\n?)+)$', admin=True))
 async def new_rings(msg: Message, ctx: Context):
     split = ctx.message.text.split('\n')
     rings = []

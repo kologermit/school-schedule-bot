@@ -6,7 +6,9 @@ from aiogram.types import Message
 # Внутренние модули
 from .types import Context
 from .tools import schedule, rings, info, weather, holidays, subscribe
+from .tools import cmd_new_weekends, cmd_new_rings, cmd_new_holidays, cmd_menu, cmd_start
 from modules import b
+from config import BOT_ADMINS
     
 async def info_handler(msg: Message, ctx: Context):
     await msg.answer(answer := 
@@ -18,9 +20,18 @@ async def info_handler(msg: Message, ctx: Context):
         f'- {b(weather)} - Узнать, где будет физ-ра - на улице или в зале.\n'
         f'- {b(subscribe)} - Подписаться на рассылку расписания\n'
         f'\n{b("Команды:")}\n'
-        f'- {b("/start")} - Начать работу с ботом\n'
-        f'- {b("/menu")} - Перейти в меню\n'
+        f'- {b(cmd_start)} - Начать работу с ботом\n'
+        f'- {b(cmd_menu)} - Перейти в меню\n'
         f'- {b("КлассБуква ДеньНедели")} (10а вторник) - '
         'Узнать расписание сразу на нужный класс и день (всю неделю)')
+    if ctx.user.id in BOT_ADMINS:
+        text = (
+            b('Команды админа (видит только админы):\n')
+            +f'- {b(cmd_new_rings)} - Обновить раписание звонков\n'
+            +f'- {b(cmd_new_holidays)} - Обновить расписание каникул\n'
+            +f'- {b(cmd_new_weekends)} - Обновить раписание выходных\n'
+        )
+        answer += text
+        await msg.answer(text)
     return answer
     
