@@ -25,6 +25,7 @@ def get_filter(
     if text_upper:
         text = text.upper()
         text_list = list(map(lambda t: t.upper(), text_list))
+        pattern = pattern.upper()
     @log_async_exception
     async def filt(msg: Message, **_) -> bool:
         msg_text = str(msg.text).strip()

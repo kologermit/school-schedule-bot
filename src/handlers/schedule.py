@@ -4,6 +4,7 @@
 from json import dumps
 from datetime import datetime
 from copy import deepcopy
+from asyncio import Lock
 
 # Вешние модули
 from aiogram.types import Message
@@ -105,9 +106,10 @@ async def send_schedule(msg: Message, ctx: Context, weekday=None):
             student_class, schedule) for schedule in schedule_list)
     return await to_menu(msg, ctx, answer)
 
-async def filter_cmd_send_schedule(msg: Message) -> bool:
+@log_async_exception
+async def filter_cmd_send_schedule(msg: Message, **_) -> bool:
     return (
-        len(split := msg.text.strip().upper().split(' ')) >= 2
+        len(split := str(msg.text).strip().upper().split(' ')) >= 2
         and split[0] in all_student_class_variants
         and ' '.join(split[1:]) in WeekdayEnum.dict
     )
@@ -135,6 +137,7 @@ async def filter_update_schedule(msg: Message, **_) -> bool:
         and split[2] in 'CLASSES,STUDENTS,КЛАССЫ,УЧЕНИКИ'
         and await get_filter(admin=True)(msg)
     )
+student_class_lock = Lock()
 @dispatcher.message(filter_update_schedule)
 async def update_schedule(msg: Message, ctx: Context):
     document = await get_document_by_msg(msg)
@@ -153,16 +156,17 @@ async def update_schedule(msg: Message, ctx: Context):
                 continue
             parallel = value[:-1]
             symbol = value[-1]
-            student_class = await StudentClass.get_or_none(
-                deleted__isnull=True, 
-                parallel=parallel,
-                symbol=symbol
-            )
-            if student_class is None:
-                student_class = await StudentClass.create(
+            async with student_class_lock:
+                student_class = await StudentClass.get_or_none(
+                    deleted__isnull=True, 
                     parallel=parallel,
-                    symbol=symbol,
+                    symbol=symbol
                 )
+                if student_class is None:
+                    student_class = await StudentClass.create(
+                        parallel=parallel,
+                        symbol=symbol,
+                    )
             student_class_coords[(x, y)] = student_class
     
     results: dict[str, UpdateResult] = {}
@@ -186,22 +190,23 @@ async def update_schedule(msg: Message, ctx: Context):
             for i, lesson in enumerate(schedule_list) 
             if list(filter(bool, schedule_list[i:]))
         ]
-        await StudentClassSchedule.filter(
-            deleted__isnull=True,
-            student_class_id=student_class.id,
-            weekday=weekday,
-            type=type,
-        ).update(deleted=datetime.now())
-        schedule = await StudentClassSchedule.create(
-            student_class_id=student_class.id,
-            weekday=weekday,
-            data=dumps(schedule_list, indent=2, ensure_ascii=False),
-            type=type
-        )
         subscribers = await StudentClassSubscribe.filter(
             deleted__isnull=True,
             student_class_id=student_class.id,
         )
+        async with student_class_lock:
+            await StudentClassSchedule.filter(
+                deleted__isnull=True,
+                student_class_id=student_class.id,
+                weekday=weekday,
+                type=type,
+            ).update(deleted=datetime.now())
+            schedule = await StudentClassSchedule.create(
+                student_class_id=student_class.id,
+                weekday=weekday,
+                data=dumps(schedule_list, indent=2, ensure_ascii=False),
+                type=type
+            )
         text = f'{b("Рассылка расписания!")}\n\n{schedule_template(student_class, schedule)}'
         for subscriber in subscribers:
             try:
