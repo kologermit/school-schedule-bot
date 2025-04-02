@@ -9,20 +9,20 @@ from dispatcher import dispatcher, bot_async
 from .types import Filter, Context, UpdateResult
 from .tools import handler_result
 from .tools import get_document_by_msg, get_sheet_by_document, mailing
-from .tools import cmd_teacher
+from .tools import cmd_teacher, cmd_teacher_subscribe, cmd_teachet_unsubscribe
 from .schedule import filter_update_schedule, all_student_class_variants, schedule_template
 from .menu import to_menu
 from models import Teacher, TeacherSchedule, TeacherSubscribe, WeekdayEnum, ScheduleTypeEnum
 from modules import b
 from logger import log_async_exception
 
-@dispatcher.message(Filter(pattern=f'^{cmd_teacher}.*'))
+@dispatcher.message(Filter(pattern=f'^{cmd_teacher} .*'))
 async def t(msg: Message, ctx: Context):
     split = ctx.message.text.split(' ')
     if len(split) < 2:
         await msg.reply(answer := 'Не указана фамилия!')
         return handler_result(t, answer)
-    if (weekday := WeekdayEnum.dict.get(' '.join(split[3:]))) is None:
+    if (weekday := WeekdayEnum.dict.get(' '.join(split[2:]).upper())) is None:
         await msg.reply(answer := b('Некорректный день недели!'))
         return handler_result(t, answer)
     teacher = await Teacher.filter_all(name__icontains=split[1]).first()
@@ -42,6 +42,42 @@ async def t(msg: Message, ctx: Context):
             teacher, schedule) for schedule in schedule_list)
     return handler_result(t, await to_menu(msg, ctx, answer))
 
+
+@dispatcher.message(Filter(pattern=f'^{cmd_teacher_subscribe} .*'))
+async def ts(msg: Message, ctx: Context):
+    teacher = await Teacher.filter_all(
+        name__icontains=ctx.message.text.replace(cmd_teacher_subscribe, '').upper().strip())\
+        .first()
+    if teacher is None:
+        await msg.reply(answer := b('Учитель не найден!'))
+        return handler_result(ts, answer)
+    subscribe = await TeacherSubscribe.filter_all(user_id=ctx.user.id, teacher_id=teacher.id).first()
+    if subscribe:
+        await msg.reply(answer := b('Вы уже подписаны!'))
+        return handler_result(ts, answer)
+    await TeacherSubscribe.create(
+        user_id=ctx.user.id,
+        teacher_id=teacher.id
+    )
+    await msg.reply(answer := b('Вам успешно подписались на ' + teacher.name.title()))
+    return handler_result(ts, answer)
+    
+@dispatcher.message(Filter(pattern=f'^{cmd_teachet_unsubscribe} .*'))
+async def tu(msg: Message, ctx: Context):
+    teacher = await Teacher.filter_all(
+        name__icontains=ctx.message.text.replace(cmd_teachet_unsubscribe, '').upper().strip())\
+        .first()
+    if teacher is None:
+        await msg.reply(answer := b('Учитель не найден!'))
+        return handler_result(tu, answer)
+    subscribe = await TeacherSubscribe.filter_all(user_id=ctx.user.id, teacher_id=teacher.id).first()
+    if subscribe is None:
+        await msg.reply(answer := b('Вы не подписаны!'))
+        return handler_result(tu, answer)
+    subscribe.deleted = datetime.now()
+    await subscribe.save()
+    await msg.reply(answer := b('Вы отписались от '+teacher.name.title()))
+    return handler_result(tu, answer)
     
 @log_async_exception
 async def filter_update_teacher_schedule(msg: Message, **_):
