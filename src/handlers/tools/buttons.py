@@ -24,6 +24,9 @@ add = 'Добавить🆕'
 delete = 'Удалить❌'
 weather = 'Погода☂️'
 subscribe = 'Рассылка расписания📩'
+cmd_teacher = '/t'
+cmd_teacher_subscribe = '/ts'
+cmd_teachet_unsubscribe = '/tu'
 
 
 def list_to_keyboard(btns: list[list[str]]):

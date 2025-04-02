@@ -47,11 +47,6 @@ def filter_deleted(cls: Model, q=Q(), *args, **kwargs) -> QuerySet[Model]:
     kwargs['deleted__isnull']=True
     return cls.filter(q, *args, **kwargs)
 
-@classmethod
-def get_or_none_deleted(cls: Model, q=Q(), *args, **kwargs):
-    kwargs['deleted__isnull']=True
-    return cls.get_or_none(q, *args, **kwargs)
-
 # Модель пользователя
 class User(Model):
     id =            CommonFields.id
@@ -129,6 +124,7 @@ class WeekdayEnum:
         **dz(list_rus, list),
         **dz([str(i) for i in range(7)], list),
         **dz(list, list),
+        '': ALL_DAYS,
     }
     dict_rus = dz(list, list_rus)    
     
@@ -143,7 +139,6 @@ class StudentClass(Model):
     def __repr__(self):
         return f'<StuidentClass: id:{self.id} name:{self}>'
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
     
 # Модель расписания класса
 class StudentClassSchedule(Model):
@@ -154,7 +149,6 @@ class StudentClassSchedule(Model):
     data =          CommonFields.json
     type =          CommonFields.string
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
  
 # Модель рассылки расписания класса   
 class StudentClassSubscribe(Model):
@@ -163,20 +157,17 @@ class StudentClassSubscribe(Model):
     student_class = CommonFields.student_class
     user =          CommonFields.user
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
     
 # Модель учителя
 class Teacher(Model):
     created =       CommonFields.created
     deleted =       CommonFields.datetime_or_null
-    surname =       CommonFields.string
-    initials =      CommonFields.string
+    name =          CommonFields.string
     def __str__(self):
-        return f'{self.surname} {self.initials}'
+        return self.name
     def __repr__(self):
-        return '<Teacher id:{self.id} name:{self}>'
+        return f'<Teacher id:{self.id} name:{self}>'
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
     
 # Модель расписания учителя
 class TeacherSchedule(Model):
@@ -187,7 +178,6 @@ class TeacherSchedule(Model):
     data =          CommonFields.json
     type =          CommonFields.string
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
     
 # Модель рассылки расписания учителя
 class TeacherSubscribe(Model):
@@ -196,7 +186,6 @@ class TeacherSubscribe(Model):
     teacher =       CommonFields.teacher
     user =          CommonFields.user
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
     
 # Можель расписания звонков
 class Ring(Model):
@@ -205,7 +194,6 @@ class Ring(Model):
     start =         CommonFields.time
     end =           CommonFields.time
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted
     
 # Модель каникул   
 class Holiday(Model):
@@ -214,4 +202,3 @@ class Holiday(Model):
     is_holiday =    CommonFields.bool
     summary =       CommonFields.string
     filter_all = filter_deleted
-    get_or_none_all = get_or_none_deleted

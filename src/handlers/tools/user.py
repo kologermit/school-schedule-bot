@@ -20,7 +20,7 @@ async def get_user_by_msg(msg: Message) -> User:
         user_cached = {}
     if msg.message_id in user_cached:
         return user_cached[msg.message_id]
-    if (user := await User.get_or_none(id=msg.from_user.id)) is None:
+    if (user := await User.filter(id=msg.from_user.id).first()) is None:
         async with user_locks.get(msg.from_user.id, Lock()):
             user = await User.create(
                 id=msg.from_user.id,
@@ -32,7 +32,6 @@ async def get_user_by_msg(msg: Message) -> User:
                 'user': {
                     'id': user.id,
                     'name': user.name,
-                    
                 }
             })
     user_cached[msg.message_id] = user

@@ -59,10 +59,10 @@ async def to_add(msg: Message, ctx: Context):
 @dispatcher.message(Filter(screen=subscribe_add_screen, text_list=all_student_class_variants))
 async def add_handler(msg: Message, ctx: Context):
     parallel, symbol = get_parallel_and_symbol_by_text(ctx.message.text)
-    student_class = await StudentClass.get_or_none_all(
+    student_class = await StudentClass.filter_all(
         parallel=parallel,
         symbol=symbol,
-    )
+    ).first()
     if student_class is None:
         await msg.reply(answer := b('Класс не найден!'))
         return handler_result(add_handler, answer)
@@ -86,17 +86,17 @@ async def to_delete(msg: Message, ctx: Context):
 @dispatcher.message(Filter(screen=subscribe_delete_screen, text_list=all_student_class_variants))
 async def delete_handler(msg: Message, ctx: Context):
     parallel, symbol = get_parallel_and_symbol_by_text(ctx.message.text)
-    student_class = await StudentClass.get_or_none_all(
+    student_class = await StudentClass.filter_all(
         parallel=parallel,
         symbol=symbol,
-    )
+    ).first()
     if student_class is None:
         await msg.reply(answer := b('Такой класс не найден!'))
         return handler_result(delete_handler, answer)
-    subscribe = await StudentClassSubscribe.get_or_none_all(
+    subscribe = await StudentClassSubscribe.filter_all(
         student_class_id=student_class.id,
         user_id=ctx.user.id,
-    )
+    ).first()
     if subscribe is None:
         await msg.reply(answer := 'Подписка не найдена!')
         return handler_result(delete_handler, answer)

@@ -33,7 +33,7 @@ async def middleware(
         raise TypeError('unsupperted event type')
     
     user = await get_user_by_msg(msg) 
-    if (message := await Message.get_or_none(id=msg.message_id, user_id=user.id)) is None:
+    if (message := await Message.filter(id=msg.message_id, user_id=user.id).first()) is None:
         message = await Message.create(
             id=msg.message_id,
             user_id=msg.from_user.id,

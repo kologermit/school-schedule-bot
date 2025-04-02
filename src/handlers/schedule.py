@@ -20,6 +20,7 @@ from .tools import list_to_keyboard, schedule, cmd_reset_student_class_schedule
 from .menu import to_menu
 from models import ScheduleTypeEnum, WeekdayEnum
 from models import StudentClass, StudentClassSchedule, StudentClassSubscribe
+from models import Teacher, TeacherSchedule
 from modules import b
 from logger import log_async_exception
 
@@ -40,13 +41,14 @@ async def to_schedule(msg: Message, ctx: Context) -> str:
     await msg.reply(answer := b('Выбери класс'), reply_markup=list_to_keyboard(buttons))
     return handler_result(to_schedule, answer)
 
-def schedule_template(student_class: StudentClass, schedule: StudentClassSchedule) -> str:
+def schedule_template(target: str|StudentClass|Teacher, 
+    schedule: StudentClassSchedule|TeacherSchedule) -> str:
     data: list[str] = schedule.data
     if not data:
         data = ['-']*6
     return (
         b(ScheduleTypeEnum.dict_rus[schedule.type].title())
-        +b(f' расписания {WeekdayEnum.dict_rus[schedule.weekday].lower()} {student_class}:\n')
+        +b(f' расписания {WeekdayEnum.dict_rus[schedule.weekday].lower()} {target}:\n')
         +'\n'.join(f'{b(i+1)}. {lesson}' for i, lesson in enumerate(data))
     )
     
@@ -64,7 +66,7 @@ schedule_screen_weekday = 'schedule:weekday'
 @dispatcher.message(Filter(screen=schedule_screen, text_list=all_student_class_variants))
 async def to_weekday(msg: Message, ctx: Context):
     parallel, symbol = get_parallel_and_symbol_by_text(ctx.message.text)
-    student_class = await StudentClass.get_or_none_all(
+    student_class = await StudentClass.filter_all(
         parallel=parallel,
         symbol=symbol,
     )
@@ -75,7 +77,7 @@ async def to_weekday(msg: Message, ctx: Context):
     ctx.user.tmp_data = {'parallel': parallel, 'symbol': symbol}
     list_rus = list(map(lambda t: t.title(), WeekdayEnum.list_rus))
     
-    await msg.reply(answer := b('Выбери нень недели'), reply_markup=list_to_keyboard([
+    await msg.reply(answer := b('Выбери день недели'), reply_markup=list_to_keyboard([
         list_rus[0:3],
         list_rus[3:6],
         list_rus[6:7]
@@ -90,10 +92,10 @@ async def send_schedule(msg: Message, ctx: Context, weekday=None):
     else:
         weekday = WeekdayEnum.dict[weekday]
     logger.info({'weekday': weekday, 'parallel': ctx.user.tmp_data['parallel'], 'symbol': ctx.user.tmp_data['symbol']})
-    student_class = await StudentClass.get_or_none_all(
+    student_class = await StudentClass.filter_all(
         parallel=ctx.user.tmp_data['parallel'],
         symbol=ctx.user.tmp_data['symbol']
-    )
+    ).first()
     if student_class is None:
         return handler_result(send_schedule, await to_menu(msg, ctx, b('Класс не найден!')))
 
@@ -137,10 +139,21 @@ async def filter_update_schedule(msg: Message, **_) -> bool:
         and len(split := file_name.replace('.XLSX', '').replace('.XLS', '').split(' ')) >= 3
         and split[0] in WeekdayEnum.dict
         and split[1] in ScheduleTypeEnum.dict
-        and split[2] in 'CLASSES,STUDENTS,КЛАССЫ,УЧЕНИКИ'
+    )
+@log_async_exception
+async def filter_update_schedule_student_classes(msg: Message, **_) -> bool:
+    return (
+        msg.document is not None
+        and any(l in msg.document.file_name.upper() for l in [
+            'КЛАССЫ', 'КЛАСС', 
+            'УЧЕНИК', 'УЧЕНИКИ',
+            'STUDENT', 'STUDENTS', 
+            'CLASS', 'CLASSES',
+            ])
     )
 student_class_lock = Lock()
-@dispatcher.message(filter_update_schedule, Filter(admin=True))
+@dispatcher.message(filter_update_schedule, 
+    filter_update_schedule_student_classes, Filter(admin=True))
 async def update_schedule(msg: Message, ctx: Context):
     document = await get_document_by_msg(msg)
     sheet = get_sheet_by_document(document)
@@ -158,11 +171,11 @@ async def update_schedule(msg: Message, ctx: Context):
                 continue
             parallel, symbol = get_parallel_and_symbol_by_text(value)
             async with student_class_lock:
-                student_class = await StudentClass.get_or_none(
+                student_class = await StudentClass.filter_all(
                     deleted__isnull=True, 
                     parallel=parallel,
                     symbol=symbol
-                )
+                ).first()
                 if student_class is None:
                     student_class = await StudentClass.create(
                         parallel=parallel,
@@ -211,12 +224,7 @@ async def update_schedule(msg: Message, ctx: Context):
             len(subscribers),
             len(schedule.data),
         )
-    answer = (
-        b(f'Отчёт по рассылке {document.name}:\n')
-        +'\n'.join(f'- {student_class} - Уроков: {result.count_lessons} - Подписок: {result.count_subscribers}' 
-            for student_class, result in results.items())
-    )
-    await msg.reply(answer)
+    await msg.reply(answer := UpdateResult.results_to_text(document.name, results))
     return handler_result(update_schedule, answer)
 
 @dispatcher.message(Filter(admin=True, text=cmd_reset_student_class_schedule))
