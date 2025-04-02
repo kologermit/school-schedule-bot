@@ -8,7 +8,14 @@ from dispatcher import dispatcher
 from .tools import handler_result
 from .types import Context, Filter
 from .tools import schedule, rings, info, weather, holidays, subscribe
-from .tools import cmd_new_weekends, cmd_new_rings, cmd_new_holidays, cmd_menu, cmd_start
+from .tools import (
+    cmd_reset_student_class_schedule,
+    cmd_new_weekends, 
+    cmd_new_rings, 
+    cmd_new_holidays, 
+    cmd_menu, 
+    cmd_start,
+)
 from modules import b
 from config import BOT_ADMINS
     
@@ -33,6 +40,7 @@ async def info_handler(msg: Message, ctx: Context):
             +f'- {b(cmd_new_rings)} - Обновить раписание звонков\n'
             +f'- {b(cmd_new_holidays)} - Обновить расписание каникул\n'
             +f'- {b(cmd_new_weekends)} - Обновить раписание выходных\n'
+            +f'- {b(cmd_reset_student_class_schedule)} - Сбросить классы, расписание и подписки'
         )
         answer += text
         await msg.reply(text)

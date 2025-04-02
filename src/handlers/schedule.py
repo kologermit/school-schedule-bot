@@ -16,7 +16,7 @@ from dispatcher import dispatcher, bot_async
 from .tools import handler_result
 from .tools import get_document_by_msg, get_sheet_by_document
 from .types import Context, UpdateResult, Filter
-from .tools import list_to_keyboard, schedule
+from .tools import list_to_keyboard, schedule, cmd_reset_student_class_schedule
 from .menu import to_menu
 from models import ScheduleTypeEnum, WeekdayEnum
 from models import StudentClass, StudentClassSchedule, StudentClassSubscribe
@@ -76,6 +76,7 @@ async def to_weekday(msg: Message, ctx: Context):
         list_rus[3:6],
         list_rus[6:7]
     ]))
+    return handler_result(to_weekday, answer)
     
 
 @dispatcher.message(Filter(screen=schedule_screen_weekday, text_list=WeekdayEnum.dict))
@@ -91,7 +92,7 @@ async def send_schedule(msg: Message, ctx: Context, weekday=None):
         symbol=ctx.user.tmp_data['symbol']
     )
     if student_class is None:
-        return await to_menu(msg, ctx, b('Класс не найден!'))
+        return handler_result(send_schedule, await to_menu(msg, ctx, b('Класс не найден!')))
 
     schedule_list = await StudentClassSchedule.filter(
         deleted__isnull=True,
@@ -105,7 +106,7 @@ async def send_schedule(msg: Message, ctx: Context, weekday=None):
     else:
         answer = '\n\n'.join(schedule_template(
             student_class, schedule) for schedule in schedule_list)
-    return await to_menu(msg, ctx, answer)
+    return handler_result(send_schedule, await to_menu(msg, ctx, answer))
 
 @log_async_exception
 async def filter_cmd_send_schedule(msg: Message, **_) -> bool:
@@ -120,7 +121,7 @@ async def cmd_send_result(msg: Message, ctx: Context):
     parallel = split[0][:-1]
     symbol = split[0][-1]
     ctx.user.tmp_data[schedule_screen] = {'parallel': parallel, 'symbol': symbol}
-    return await send_schedule(msg, ctx, ' '.join(split[1:]))
+    return handler_result(cmd_send_result, await send_schedule(msg, ctx, ' '.join(split[1:])))
     
 
 @log_async_exception
@@ -224,3 +225,18 @@ async def update_schedule(msg: Message, ctx: Context):
     )
     await msg.reply(answer)
     return handler_result(update_schedule, answer)
+
+@dispatcher.message(Filter(admin=True, text=cmd_reset_student_class_schedule))
+async def reset_student_schedule(msg: Message, ctx: Context):
+    student_class_filter = StudentClass.filter(deleted__isnull=True)
+    student_classes = await student_class_filter
+    student_class_ids = list(map(lambda sc: sc.id, student_classes))
+    await student_class_filter.update(deleted=datetime.now())
+    await StudentClassSchedule\
+        .filter(student_class_id__in=student_class_ids)\
+        .update(deleted=datetime.now())
+    await StudentClassSubscribe\
+        .filter(student_class_id__in=student_class_ids)\
+        .update(deleted=datetime.now())
+    await msg.reply(answer := 'Сброшены классы: '+', '.join(map(str, student_classes)))
+    return handler_result(reset_student_schedule, answer)
