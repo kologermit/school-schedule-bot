@@ -1,20 +1,20 @@
 # Модуль с обработчиком праздников
 
 # Встроенные модули
-from datetime import time, datetime
+from datetime import datetime
 
 # Внешние модули
 from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .tools import get_filter, handler_result
+from .tools import handler_result
 from .tools import cmd_new_holidays, cmd_new_weekends, holidays
 from models import Holiday
 from modules import b
-from .types import Context
+from .types import Context, Filter
     
-@dispatcher.message(get_filter(text=holidays))
+@dispatcher.message(Filter(text=holidays))
 async def holidays_handler(msg: Message, ctx: Context):
     holidays = await Holiday.filter(deleted__isnull=True, is_holiday=True).order_by('id')
     weekends = await Holiday.filter(deleted__isnull=True, is_holiday=False).order_by('id')
@@ -31,7 +31,7 @@ async def holidays_handler(msg: Message, ctx: Context):
 # Праздники1
 # Праздники2
 # ...
-@dispatcher.message(get_filter(pattern=f'^({cmd_new_holidays}|{cmd_new_weekends}).*', admin=True))
+@dispatcher.message(Filter(pattern=f'^({cmd_new_holidays}|{cmd_new_weekends}).*', admin=True))
 async def new_holidays(msg: Message, ctx: Context):
     split = ctx.message.text.split('\n')
     is_holidays = cmd_new_holidays in split[0]

@@ -5,8 +5,8 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .types import Context
-from .tools import get_filter, handler_result
+from .types import Context, Filter
+from .tools import handler_result
 from .tools import list_to_keyboard
 from .tools import add, delete, subscribe
 from models import StudentClassSubscribe, StudentClass
@@ -16,7 +16,7 @@ subscribe_screen = 'subscribe'
 
 # Процедура перехода в меню
 
-@dispatcher.message(get_filter(text=subscribe))
+@dispatcher.message(Filter(text=subscribe))
 async def to_subscribe(msg: Message, ctx: Context) -> str:
     ctx.user.screen = subscribe_screen
     subscribes = await StudentClassSubscribe.filter(

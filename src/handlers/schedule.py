@@ -13,9 +13,9 @@ from loguru import logger
 
 # Внутренние модули
 from dispatcher import dispatcher, bot_async
-from .tools import get_filter, handler_result
+from .tools import handler_result
 from .tools import get_document_by_msg, get_sheet_by_document
-from .types import Context, UpdateResult
+from .types import Context, UpdateResult, Filter
 from .tools import list_to_keyboard, schedule
 from .menu import to_menu
 from models import ScheduleTypeEnum, WeekdayEnum
@@ -26,7 +26,7 @@ from logger import log_async_exception
 schedule_screen = 'schedule:class'
 
 # Процедура перехода в меню
-@dispatcher.message(get_filter(text=schedule))
+@dispatcher.message(Filter(text=schedule))
 async def to_schedule(msg: Message, ctx: Context) -> str:
     ctx.user.screen = schedule_screen
     buttons: dict[int, list[str]] = {}
@@ -55,7 +55,7 @@ for parallel in range(5, 12):
         
         
 schedule_screen_weekday = 'schedule:weekday'
-@dispatcher.message(get_filter(screen=schedule_screen, text_list=all_student_class_variants))
+@dispatcher.message(Filter(screen=schedule_screen, text_list=all_student_class_variants))
 async def to_weekday(msg: Message, ctx: Context):
     parallel = ctx.message.text[:-1]
     symbol = ctx.message.text[-1]
@@ -78,7 +78,7 @@ async def to_weekday(msg: Message, ctx: Context):
     ]))
     
 
-@dispatcher.message(get_filter(screen=schedule_screen_weekday, text_list=WeekdayEnum.dict))
+@dispatcher.message(Filter(screen=schedule_screen_weekday, text_list=WeekdayEnum.dict))
 async def send_schedule(msg: Message, ctx: Context, weekday=None):
     if not weekday:
         weekday = WeekdayEnum.dict[ctx.message.text.upper()]
@@ -136,10 +136,9 @@ async def filter_update_schedule(msg: Message, **_) -> bool:
         and split[0] in WeekdayEnum.dict
         and split[1] in ScheduleTypeEnum.dict
         and split[2] in 'CLASSES,STUDENTS,КЛАССЫ,УЧЕНИКИ'
-        and await get_filter(admin=True)(msg)
     )
 student_class_lock = Lock()
-@dispatcher.message(filter_update_schedule)
+@dispatcher.message(filter_update_schedule, Filter(admin=True))
 async def update_schedule(msg: Message, ctx: Context):
     document = await get_document_by_msg(msg)
     sheet = get_sheet_by_document(document)

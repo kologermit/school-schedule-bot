@@ -11,13 +11,12 @@ from aiogram.types import Message
 from dispatcher import dispatcher
 from models import Ring
 from modules import b, time_template
-from logger import log_async_exception
-from .tools import get_filter, handler_result
+from .tools import handler_result
 from .tools import cmd_new_rings, rings
-from .types import Context
+from .types import Context, Filter
     
     
-@dispatcher.message(get_filter(text=rings))
+@dispatcher.message(Filter(text=rings))
 async def rings_handler(msg: Message, ctx: Context):
     rings = await Ring.filter(deleted__isnull=True).order_by('start')
     answer = b("Раписание звонков:\n")+'\n'.join(
@@ -31,7 +30,7 @@ async def rings_handler(msg: Message, ctx: Context):
 # 08:20-09:10
 # 09:20-10:10
 # ...
-@dispatcher.message(get_filter(admin=True, pattern=f'.*{cmd_new_rings}.*'))
+@dispatcher.message(Filter(admin=True, pattern=f'.*{cmd_new_rings}.*'))
 async def new_rings(msg: Message, ctx: Context):
     split = ctx.message.text.split('\n')
     rings = []

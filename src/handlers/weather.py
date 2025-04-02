@@ -9,14 +9,14 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .types import Context
-from .tools import get_filter, handler_result, weather
+from .types import Context, Filter
+from .tools import handler_result, weather
 from modules import WeatherAPI, b, WeatherEnum
 from config import WEATHER_API_KEY
 
 weather_api = WeatherAPI(WEATHER_API_KEY, 56.875299, 53.219367)
     
-@dispatcher.message(get_filter(text=weather))
+@dispatcher.message(Filter(text=weather))
 async def weather_handler(msg: Message, ctx: Context):
     weather_result = await weather_api.fetch()
     month = date.today().month

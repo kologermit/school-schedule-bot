@@ -1,7 +1,6 @@
 *
 !.gitignore
 !user.py
-!filters.py
 !handler_result.py
 !buttons.py
 !__init__.py

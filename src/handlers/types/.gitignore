@@ -5,3 +5,5 @@
 !WeekdayEnum.py
 !ScheduleTypeEnum.py
 !UpdateResult.py
+!Filter.py
+!HandlerResult.py

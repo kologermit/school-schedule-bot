@@ -5,10 +5,11 @@ from aiogram.types import Message
 
 # Внутренние модули
 from dispatcher import dispatcher
-from .tools import get_filter, handler_result
+from .tools import handler_result
+from .types import Filter
 
 # Последний возможный обработчик с ответом пользователю
-@dispatcher.message(get_filter())
+@dispatcher.message(Filter())
 async def not_found(msg: Message):
     await msg.reply(answer := 'Не понял!')
     return handler_result(not_found, answer)
