@@ -9,7 +9,7 @@ from dispatcher import dispatcher, bot_async
 from .types import Filter, Context, UpdateResult
 from .tools import handler_result
 from .tools import get_document_by_msg, get_sheet_by_document, mailing
-from .tools import cmd_teacher, cmd_teacher_subscribe, cmd_teachet_unsubscribe
+from .tools import cmd_teacher, cmd_teacher_subscribe, cmd_teachet_unsubscribe, cmd_reset_teacher_schedule
 from .schedule import filter_update_schedule, all_student_class_variants, schedule_template
 from .menu import to_menu
 from models import Teacher, TeacherSchedule, TeacherSubscribe, WeekdayEnum, ScheduleTypeEnum
@@ -163,5 +163,18 @@ async def update_teacher_schedule(msg: Message, ctx: Context):
     return handler_result(update_teacher_schedule, answer)
     
         
-        
-    
+@dispatcher.message(Filter(admin=True, text=cmd_reset_teacher_schedule))
+async def reset_teacher_schedule(msg: Message, ctx: Context):
+    teachers = await Teacher.filter_all()
+    teacher_ids = await Teacher.filter_all().values_list('id', flat=True)
+    await Teacher.filter_all().update(deleted=datetime.now())
+    await TeacherSchedule\
+        .filter_all(teacher_id__in=teacher_ids)\
+        .update(deleted=datetime.now())
+    user_ids = await TeacherSubscribe\
+        .filter_all(teacher_id__in=teacher_ids).values_list('user_id', flat=True)
+    await TeacherSubscribe.filter_all(user_id__in=user_ids).update(deleted=datetime.now())
+    await mailing('Ваша рассылка на расписание сброшена. Подпишитесь на нужного учителя снова', 
+        user_ids, bot_async)
+    await msg.reply(answer := 'Сброшены учителя: '+', '.join(map(str, teachers)))
+    return handler_result(reset_teacher_schedule, answer)

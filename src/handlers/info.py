@@ -15,8 +15,12 @@ from .tools import (
     cmd_new_holidays, 
     cmd_menu, 
     cmd_start,
+    cmd_teacher,
+    cmd_teacher_subscribe,
+    cmd_teachet_unsubscribe,
+    cmd_reset_teacher_schedule,
 )
-from modules import b
+from modules import b, pre
 from config import BOT_ADMINS
     
 @dispatcher.message(Filter(text=info))
@@ -34,13 +38,24 @@ async def info_handler(msg: Message, ctx: Context):
         f'- {b(cmd_menu)} - Перейти в меню\n'
         f'- {b("КлассБуква ДеньНедели")} (10а вторник) - '
         'Узнать расписание сразу на нужный класс и день (всю неделю)')
+    from loguru import logger
+    logger.info({'id': ctx.user.id, 'admins': BOT_ADMINS})
     if ctx.user.id in BOT_ADMINS:
         text = (
             b('Команды админа (видит только админы):\n')
-            +f'- {b(cmd_new_rings)} - Обновить раписание звонков\n'
-            +f'- {b(cmd_new_holidays)} - Обновить расписание каникул\n'
-            +f'- {b(cmd_new_weekends)} - Обновить раписание выходных\n'
-            +f'- {b(cmd_reset_student_class_schedule)} - Сбросить классы, расписание и подписки'
+            +f'- {b(cmd_new_rings)} - Обновить раписание звонков '
+            +f'(на каждой строке время начала и время окончания, например {pre("08:20-09:00")})\n'
+            +f'- {b(cmd_new_holidays)} - Обновить расписание каникул '
+            +f'(на каждой строке описание даты, например {pre("28 октября (пн) - 02 ноября (сб)")})\n'
+            +f'- {b(cmd_new_weekends)} - Обновить раписание выходных '
+            +f'(на каждой строке описание даты {pre("4 ноября (пн)")})\n'
+            +f'- {b(cmd_reset_student_class_schedule)} - Сбросить классы, расписание и подписки\n'
+            +f'- {b(cmd_reset_teacher_schedule)} - Сбросить учителей, расписание и подписки\n'
+            +b('\nСкрытые команды (могут использовать все):\n')
+            +f'- {b(cmd_teacher)} ФАМИЛИЯ ДЕНЬ_НЕДЕЛИ - получить расписание учителя. '
+            +'Если не введен день недели, то будет показано расписание на всю неделю\n'
+            +f'- {b(cmd_teacher_subscribe)} ФАМИЛИЯ - подписаться на рассылку расписания учителя\n'
+            +f'- {b(cmd_teachet_unsubscribe)} ФАМИЛИЯ - отписаться от рассылки на расписание учителя\n'
         )
         answer += text
         await msg.reply(text)
