@@ -13,6 +13,7 @@ from telebot import TeleBot
 # Внутренние модули
 from modules import b, pre, datetime_template
 from modules import create_dir_if_not_exists
+from modules import send_to_admin
 
 # Глобальные переменные, которые меняются при инициации
 bot = None
@@ -58,12 +59,12 @@ def log_err_with_code_and_send_message(err: Exception) -> str:
     if bot:
         try:
             now = datetime.now()
-            if admins:
-                bot.send_message(admins[0], f"{b('Произошла ошибка:')}\n"
-                    f'  {b("Сервис:")} {pre(service)}\n'
-                    f'  {b("Код:")} {pre(code)}\n'
-                    f'  {b("Ошибка:")} {pre(err)}\n'
-                    f'  {b("Время:")} {pre(now.strftime(datetime_template))}', 'HTML')
+            send_to_admin(
+                f"{b('Произошла ошибка:')}\n"
+                f'{b("- Сервис:")} {pre(service)}\n'
+                f'{b("- Код:")} {pre(code)}\n'
+                f'{b("- Ошибка:")} {pre(err)}\n'
+                f'{b("- Время:")} {pre(now.strftime(datetime_template))}', bot, admins)
         except Exception as err2:
             logger.exception(err2)
     return code

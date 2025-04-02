@@ -14,7 +14,7 @@ from config import BOT_ADMINS
     
 @dispatcher.message(get_filter(text=info))
 async def info_handler(msg: Message, ctx: Context):
-    await msg.answer(answer := 
+    await msg.reply(answer := 
         f'{b("Кнопки для пользования ботом:")}\n'
         f'- {b(schedule)} - Узнать расписание уроков\n'
         f'- {b(rings)} - Узнать расписание звонков\n'
@@ -35,6 +35,6 @@ async def info_handler(msg: Message, ctx: Context):
             +f'- {b(cmd_new_weekends)} - Обновить раписание выходных\n'
         )
         answer += text
-        await msg.answer(text)
+        await msg.reply(text)
     return handler_result(info_handler, answer)
     

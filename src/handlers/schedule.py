@@ -15,9 +15,10 @@ from loguru import logger
 from dispatcher import dispatcher, bot_async
 from .tools import get_filter, handler_result
 from .tools import get_document_by_msg, get_sheet_by_document
-from .types import Context, ScheduleTypeEnum, WeekdayEnum, UpdateResult
+from .types import Context, UpdateResult
 from .tools import list_to_keyboard, schedule
 from .menu import to_menu
+from models import ScheduleTypeEnum, WeekdayEnum
 from models import StudentClass, StudentClassSchedule, StudentClassSubscribe
 from modules import b
 from logger import log_async_exception
@@ -32,7 +33,7 @@ async def to_schedule(msg: Message, ctx: Context) -> str:
     for c in await StudentClass.filter(deleted__isnull=True):
         buttons[c.parallel] = sorted(buttons.get(c.parallel, []) + [f'{c.parallel}{c.symbol}'])
     markup_buttons = [value for _, value in buttons.items()]
-    await msg.answer(answer := b('Выбери класс'), reply_markup=list_to_keyboard(markup_buttons))
+    await msg.reply(answer := b('Выбери класс'), reply_markup=list_to_keyboard(markup_buttons))
     return handler_result(to_schedule, answer)
 
 def schedule_template(student_class: StudentClass, schedule: StudentClassSchedule) -> str:
@@ -64,13 +65,13 @@ async def to_weekday(msg: Message, ctx: Context):
         symbol=symbol,
     )
     if student_class is None:
-        await msg.answer(answer := 'Класс не найден!')
+        await msg.reply(answer := 'Класс не найден!')
         return handler_result(to_weekday, answer)
     ctx.user.screen = schedule_screen_weekday
     ctx.user.tmp_data = {'parallel': parallel, 'symbol': symbol}
     list_rus = list(map(lambda t: t.title(), WeekdayEnum.list_rus))
     
-    await msg.answer(answer := b('Выбери нень недели'), reply_markup=list_to_keyboard([
+    await msg.reply(answer := b('Выбери нень недели'), reply_markup=list_to_keyboard([
         list_rus[0:3],
         list_rus[3:6],
         list_rus[6:7]

@@ -25,5 +25,5 @@ async def to_menu(msg: Message, ctx: Context, answer=None):
         'нужную для учёбы в ГЮЛ 86'
     elif answer is None:
         answer = 'Меню'
-    await msg.answer(answer, reply_markup=menu_keyboard)
+    await msg.reply(answer, reply_markup=menu_keyboard)
     return handler_result(to_menu, answer)

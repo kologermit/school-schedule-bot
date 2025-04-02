@@ -7,3 +7,5 @@
 !parse_config.py
 !__init__.py
 !weather.py
+!wait_next_day.py
+!send_to_admin.py

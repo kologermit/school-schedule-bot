@@ -10,7 +10,7 @@ from .tools import get_filter, handler_result
 # Последний возможный обработчик с ответом пользователю
 @dispatcher.message(get_filter())
 async def not_found(msg: Message):
-    await msg.answer(answer := 'Не понял!')
+    await msg.reply(answer := 'Не понял!')
     return handler_result(not_found, answer)
     
 # Последний обработчик вообще, чтобы отработал мидлвар

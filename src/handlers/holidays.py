@@ -23,7 +23,7 @@ async def holidays_handler(msg: Message, ctx: Context):
         +'\n\n'+b('Выходные:\n')
         +'\n'.join(f'{b(i+1)}. {holiday.summary}' for i, holiday in enumerate(weekends))
     )
-    await msg.answer(answer)
+    await msg.reply(answer)
     return handler_result(holidays_handler, answer)
 
 
@@ -41,6 +41,6 @@ async def new_holidays(msg: Message, ctx: Context):
             summary=line, 
             is_holiday=is_holidays,
         ), split[1:]))
-    await msg.answer(answer := 'Каникулы обновлены')
+    await msg.reply(answer := 'Каникулы обновлены')
     answer += str(await holidays_handler(msg, ctx))
     return handler_result(new_holidays, answer)

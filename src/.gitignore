@@ -9,3 +9,4 @@
 !handlers
 !db.py
 !models.py
+!remove_schedule

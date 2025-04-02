@@ -8,6 +8,7 @@ from loguru import logger
 
 # Внутренние модули
 from config import BOT_TOKEN, BOT_START_MESSAGE, BOT_ADMINS
+from modules import send_to_admin
 
 
 # Глобальные переменные для импортирования
@@ -26,8 +27,7 @@ async def on_startup() -> None:
         'event': 'START_BOT_POLLING', 
         'bot': bot_info
     })
-    if BOT_ADMINS:
-        await bot_async.send_message(BOT_ADMINS[0], BOT_START_MESSAGE)
+    send_to_admin(BOT_START_MESSAGE, bot_sync, BOT_ADMINS)
 
 # Процедура инициализации
 def init() -> None:
