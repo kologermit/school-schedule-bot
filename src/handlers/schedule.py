@@ -14,7 +14,7 @@ from loguru import logger
 # Внутренние модули
 from dispatcher import dispatcher, bot_async
 from .tools import handler_result
-from .tools import get_document_by_msg, get_sheet_by_document
+from .tools import get_document_by_msg, get_sheet_by_document, mailing
 from .types import Context, UpdateResult, Filter
 from .tools import list_to_keyboard, schedule, cmd_reset_student_class_schedule
 from .menu import to_menu
@@ -25,15 +25,19 @@ from logger import log_async_exception
 
 schedule_screen = 'schedule:class'
 
+def get_student_class_buttons(student_classes: list[StudentClass]):
+    buttons: dict[int, list[str]] = {}
+    for c in student_classes:
+        buttons[c.parallel] = sorted(buttons.get(c.parallel, []) + [f'{c.parallel}{c.symbol}'])
+    return [value for _, value in buttons.items()]
+
 # Процедура перехода в меню
 @dispatcher.message(Filter(text=schedule))
 async def to_schedule(msg: Message, ctx: Context) -> str:
     ctx.user.screen = schedule_screen
-    buttons: dict[int, list[str]] = {}
-    for c in await StudentClass.filter(deleted__isnull=True):
-        buttons[c.parallel] = sorted(buttons.get(c.parallel, []) + [f'{c.parallel}{c.symbol}'])
-    markup_buttons = [value for _, value in buttons.items()]
-    await msg.reply(answer := b('Выбери класс'), reply_markup=list_to_keyboard(markup_buttons))
+    student_classes = await StudentClass.filter_all()
+    buttons = get_student_class_buttons(student_classes)
+    await msg.reply(answer := b('Выбери класс'), reply_markup=list_to_keyboard(buttons))
     return handler_result(to_schedule, answer)
 
 def schedule_template(student_class: StudentClass, schedule: StudentClassSchedule) -> str:
@@ -45,7 +49,9 @@ def schedule_template(student_class: StudentClass, schedule: StudentClassSchedul
         +b(f' расписания {WeekdayEnum.dict_rus[schedule.weekday].lower()} {student_class}:\n')
         +'\n'.join(f'{b(i+1)}. {lesson}' for i, lesson in enumerate(data))
     )
-
+    
+def get_parallel_and_symbol_by_text(text: str) -> tuple[str, str]:
+    return text[:-1], text[-1]
 
 all_russian_symbols = 'ЙЦУВКАЕПНГШЩЗХЪФЫВАПРОЛДЖЭЧСМИТЬБЮ'
 all_student_class_variants: set[str] = set()
@@ -57,10 +63,8 @@ for parallel in range(5, 12):
 schedule_screen_weekday = 'schedule:weekday'
 @dispatcher.message(Filter(screen=schedule_screen, text_list=all_student_class_variants))
 async def to_weekday(msg: Message, ctx: Context):
-    parallel = ctx.message.text[:-1]
-    symbol = ctx.message.text[-1]
-    student_class = await StudentClass.get_or_none(
-        deleted__isnull=True,
+    parallel, symbol = get_parallel_and_symbol_by_text(ctx.message.text)
+    student_class = await StudentClass.get_or_none_all(
         parallel=parallel,
         symbol=symbol,
     )
@@ -86,16 +90,14 @@ async def send_schedule(msg: Message, ctx: Context, weekday=None):
     else:
         weekday = WeekdayEnum.dict[weekday]
     logger.info({'weekday': weekday, 'parallel': ctx.user.tmp_data['parallel'], 'symbol': ctx.user.tmp_data['symbol']})
-    student_class = await StudentClass.get_or_none(
-        deleted__isnull=True,
+    student_class = await StudentClass.get_or_none_all(
         parallel=ctx.user.tmp_data['parallel'],
         symbol=ctx.user.tmp_data['symbol']
     )
     if student_class is None:
         return handler_result(send_schedule, await to_menu(msg, ctx, b('Класс не найден!')))
 
-    schedule_list = await StudentClassSchedule.filter(
-        deleted__isnull=True,
+    schedule_list = await StudentClassSchedule.filter_all(
         student_class_id=student_class.id,
         **({} if weekday == WeekdayEnum.ALL_DAYS else {"weekday": weekday})
     )
@@ -118,8 +120,7 @@ async def filter_cmd_send_schedule(msg: Message, **_) -> bool:
 @dispatcher.message(filter_cmd_send_schedule)
 async def cmd_send_result(msg: Message, ctx: Context):
     split = ctx.message.text.upper().split(' ')
-    parallel = split[0][:-1]
-    symbol = split[0][-1]
+    parallel, symbol = get_parallel_and_symbol_by_text(split[0])
     ctx.user.tmp_data[schedule_screen] = {'parallel': parallel, 'symbol': symbol}
     return handler_result(cmd_send_result, await send_schedule(msg, ctx, ' '.join(split[1:])))
     
@@ -155,8 +156,7 @@ async def update_schedule(msg: Message, ctx: Context):
                 break
             if value not in all_student_class_variants:
                 continue
-            parallel = value[:-1]
-            symbol = value[-1]
+            parallel, symbol = get_parallel_and_symbol_by_text(value)
             async with student_class_lock:
                 student_class = await StudentClass.get_or_none(
                     deleted__isnull=True, 
@@ -191,13 +191,10 @@ async def update_schedule(msg: Message, ctx: Context):
             for i, lesson in enumerate(schedule_list) 
             if list(filter(bool, schedule_list[i:]))
         ]
-        subscribers = await StudentClassSubscribe.filter(
-            deleted__isnull=True,
-            student_class_id=student_class.id,
-        )
+        subscribers = await StudentClassSubscribe.filter_all(
+            student_class_id=student_class.id).values_list('user_id', flat=True)
         async with student_class_lock:
-            await StudentClassSchedule.filter(
-                deleted__isnull=True,
+            await StudentClassSchedule.filter_all(
                 student_class_id=student_class.id,
                 weekday=weekday,
                 type=type,
@@ -209,11 +206,7 @@ async def update_schedule(msg: Message, ctx: Context):
                 type=type
             )
         text = f'{b("Рассылка расписания!")}\n\n{schedule_template(student_class, schedule)}'
-        for subscriber in subscribers:
-            try:
-                await bot_async.send_message(subscriber.user_id, text)
-            except TelegramBadRequest:
-                continue
+        await mailing(text, subscribers, bot_async)
         results[str(student_class)] = UpdateResult(
             len(subscribers),
             len(schedule.data),
@@ -228,15 +221,16 @@ async def update_schedule(msg: Message, ctx: Context):
 
 @dispatcher.message(Filter(admin=True, text=cmd_reset_student_class_schedule))
 async def reset_student_schedule(msg: Message, ctx: Context):
-    student_class_filter = StudentClass.filter(deleted__isnull=True)
-    student_classes = await student_class_filter
-    student_class_ids = list(map(lambda sc: sc.id, student_classes))
-    await student_class_filter.update(deleted=datetime.now())
+    student_classes = await StudentClass.filter_all()
+    student_class_ids = await StudentClass.filter_all().values_list('id', flat=True)
+    await StudentClass.filter_all().update(deleted=datetime.now())
     await StudentClassSchedule\
-        .filter(student_class_id__in=student_class_ids)\
+        .filter_all(student_class_id__in=student_class_ids)\
         .update(deleted=datetime.now())
-    await StudentClassSubscribe\
-        .filter(student_class_id__in=student_class_ids)\
-        .update(deleted=datetime.now())
+    user_ids = await StudentClassSubscribe\
+        .filter_all(student_class_id__in=student_class_ids).values_list('user_id', flat=True)
+    await StudentClassSubscribe.filter_all(user_id__in=user_ids).update(deleted=datetime.now())
+    await mailing('Ваша рассылка на расписание сброшена. Подпишитесь на нужный класс снова', 
+        user_ids, bot_async)
     await msg.reply(answer := 'Сброшены классы: '+', '.join(map(str, student_classes)))
     return handler_result(reset_student_schedule, answer)

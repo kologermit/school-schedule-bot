@@ -1,11 +1,18 @@
 # Модуль моделей БД
 
 # Встроенные модули
-from datetime import datetime as DateTime, date as Date, time as Time
+from datetime import (
+    datetime as DateTime, 
+    date as     Date, 
+    time as     Time
+)
+from typing import Awaitable
 
 # Внешние модули
 from tortoise.models import Model
 from tortoise import fields as ORMField
+from tortoise.expressions import Q
+from tortoise.queryset import QuerySet
 
 Bool = bool
 
@@ -22,7 +29,7 @@ class CommonFields:
     time: Time =                    ORMField.TimeField(null=False)
     time_or_null: Time|None =       ORMField.TimeDeltaField(null=True)
     json: any =                     ORMField.JSONField(null=False)
-    json_or_null: any =        ORMField.JSONField(null=True)
+    json_or_null: any =             ORMField.JSONField(null=True)
     number: int =                   ORMField.BigIntField(null=False)
     number_or_null: int|None =      ORMField.BigIntField(null=True)
     bool: Bool =                    ORMField.BooleanField(null=False)
@@ -34,6 +41,16 @@ class CommonFields:
     student_class = ORMField.ForeignKeyField('models.StudentClass', null=False)
     teacher =       ORMField.ForeignKeyField('models.Teacher', null=False)
 
+
+@classmethod
+def filter_deleted(cls: Model, q=Q(), *args, **kwargs) -> QuerySet[Model]:
+    kwargs['deleted__isnull']=True
+    return cls.filter(q, *args, **kwargs)
+
+@classmethod
+def get_or_none_deleted(cls: Model, q=Q(), *args, **kwargs):
+    kwargs['deleted__isnull']=True
+    return cls.get_or_none(q, *args, **kwargs)
 
 # Модель пользователя
 class User(Model):
@@ -125,6 +142,8 @@ class StudentClass(Model):
         return f'{self.parallel}{self.symbol}'
     def __repr__(self):
         return f'<StuidentClass: id:{self.id} name:{self}>'
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
     
 # Модель расписания класса
 class StudentClassSchedule(Model):
@@ -134,6 +153,8 @@ class StudentClassSchedule(Model):
     weekday =       CommonFields.string
     data =          CommonFields.json
     type =          CommonFields.string
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
  
 # Модель рассылки расписания класса   
 class StudentClassSubscribe(Model):
@@ -141,6 +162,8 @@ class StudentClassSubscribe(Model):
     deleted =       CommonFields.datetime_or_null
     student_class = CommonFields.student_class
     user =          CommonFields.user
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
     
 # Модель учителя
 class Teacher(Model):
@@ -152,6 +175,8 @@ class Teacher(Model):
         return f'{self.surname} {self.initials}'
     def __repr__(self):
         return '<Teacher id:{self.id} name:{self}>'
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
     
 # Модель расписания учителя
 class TeacherSchedule(Model):
@@ -161,6 +186,8 @@ class TeacherSchedule(Model):
     weekday =       CommonFields.string
     data =          CommonFields.json
     type =          CommonFields.string
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
     
 # Модель рассылки расписания учителя
 class TeacherSubscribe(Model):
@@ -168,6 +195,8 @@ class TeacherSubscribe(Model):
     deleted =       CommonFields.datetime_or_null
     teacher =       CommonFields.teacher
     user =          CommonFields.user
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
     
 # Можель расписания звонков
 class Ring(Model):
@@ -175,6 +204,8 @@ class Ring(Model):
     deleted =       CommonFields.datetime_or_null
     start =         CommonFields.time
     end =           CommonFields.time
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted
     
 # Модель каникул   
 class Holiday(Model):
@@ -182,3 +213,5 @@ class Holiday(Model):
     deleted =       CommonFields.datetime_or_null
     is_holiday =    CommonFields.bool
     summary =       CommonFields.string
+    filter_all = filter_deleted
+    get_or_none_all = get_or_none_deleted

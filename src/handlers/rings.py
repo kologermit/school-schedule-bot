@@ -18,7 +18,7 @@ from .types import Context, Filter
     
 @dispatcher.message(Filter(text=rings))
 async def rings_handler(msg: Message, ctx: Context):
-    rings = await Ring.filter(deleted__isnull=True).order_by('start')
+    rings = await Ring.filter_all().order_by('start')
     answer = b("Раписание звонков:\n")+'\n'.join(
         f'{b(i+1)}. {ring.start.strftime(time_template)}-{ring.end.strftime(time_template)}'
         for i, ring in enumerate(rings))
@@ -42,7 +42,7 @@ async def new_rings(msg: Message, ctx: Context):
             await msg.reply(answer := f'В строке {line} не правильно указано время')
             return handler_result(new_rings, answer)
         rings.append(Ring(start=start, end=end))
-    await Ring.filter(deleted__isnull=True).update(deleted=datetime.now())
+    await Ring.filter_all().update(deleted=datetime.now())
     await Ring.bulk_create(rings)
     await msg.reply(answer := 'Создано расписание звонков')
     answer += str(await rings_handler(msg, ctx))

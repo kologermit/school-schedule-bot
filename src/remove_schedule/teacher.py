@@ -12,11 +12,7 @@ async def init():
         yesterday, today = await wait_next_day('remove_teacher_schedule')
         weekday = WeekdayEnum.dict[str(yesterday.weekday())]
         weekday_rus = WeekdayEnum.dict_rus[weekday]
-        schedule_filter = TeacherSchedule.filter(
-            deleted__isnull=True,
-            weekday=weekday,
-            type=ScheduleTypeEnum.EDITED,
-        )
+        schedule_filter = TeacherSchedule.filter_all(weekday=weekday, type=ScheduleTypeEnum.EDITED)
         teacher_ids = list(map(lambda s: s.teacher_id, await schedule_filter))
         teachers = await Teacher.filter(id__in=teacher_ids)
         logger.info({'event': 'REMOVE_TEACHER_SCHEDULE', 'teachers': teachers})

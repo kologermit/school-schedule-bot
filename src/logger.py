@@ -63,7 +63,7 @@ def log_err_with_code_and_send_message(err: Exception) -> str:
                 f"{b('Произошла ошибка:')}\n"
                 f'{b("- Сервис:")} {pre(service)}\n'
                 f'{b("- Код:")} {pre(code)}\n'
-                f'{b("- Ошибка:")} {pre(err)}\n'
+                f'{b("- Ошибка:")} {pre(err).replace("<", "[").replace(">", "]")}\n'
                 f'{b("- Время:")} {pre(now.strftime(datetime_template))}', bot, admins)
         except Exception as err2:
             logger.exception(err2)

@@ -16,8 +16,8 @@ from .types import Context, Filter
     
 @dispatcher.message(Filter(text=holidays))
 async def holidays_handler(msg: Message, ctx: Context):
-    holidays = await Holiday.filter(deleted__isnull=True, is_holiday=True).order_by('id')
-    weekends = await Holiday.filter(deleted__isnull=True, is_holiday=False).order_by('id')
+    holidays = await Holiday.filter_all(is_holiday=True).order_by('id')
+    weekends = await Holiday.filter_all(is_holiday=False).order_by('id')
     answer = (b('Каникулы:\n')
         +'\n'.join(f'{b(i+1)}. {holiday.summary}' for i, holiday in enumerate(holidays))
         +'\n\n'+b('Выходные:\n')
@@ -35,7 +35,7 @@ async def holidays_handler(msg: Message, ctx: Context):
 async def new_holidays(msg: Message, ctx: Context):
     split = ctx.message.text.split('\n')
     is_holidays = cmd_new_holidays in split[0]
-    await Holiday.filter(is_holiday=is_holidays, deleted__isnull=True).update(deleted=datetime.now())
+    await Holiday.filter_all(is_holiday=is_holidays).update(deleted=datetime.now())
     await Holiday.bulk_create(
         map(lambda line: Holiday(
             summary=line, 
