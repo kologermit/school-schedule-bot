@@ -15,6 +15,9 @@ from .tools import (
     cmd_new_holidays, 
     cmd_menu, 
     cmd_start,
+    cmd_mailing,
+    cmd_mailing_teachers,
+    cmd_mailing_student_classes,
     cmd_teacher,
     cmd_teacher_subscribe,
     cmd_teachet_unsubscribe,
@@ -51,6 +54,9 @@ async def info_handler(msg: Message, ctx: Context):
             +f'(на каждой строке описание даты {pre("4 ноября (пн)")})\n'
             +f'- {b(cmd_reset_student_class_schedule)} - Сбросить классы, расписание и подписки\n'
             +f'- {b(cmd_reset_teacher_schedule)} - Сбросить учителей, расписание и подписки\n'
+            +f'- {b(cmd_mailing)} - Рассылка сообщения всем пользователям\n'
+            +f'- {b(cmd_mailing_teachers)} - Рассылка всем подписанным на учителей\n'
+            +f'- {b(cmd_mailing_student_classes)} - Рассылка всем подписанным на расписание классов\n'
             +b('\nСкрытые команды (могут использовать все):\n')
             +f'- {b(cmd_teacher)} ФАМИЛИЯ ДЕНЬ_НЕДЕЛИ - получить расписание учителя. '
             +'Если не введен день недели, то будет показано расписание на всю неделю\n'

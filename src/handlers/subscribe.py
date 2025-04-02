@@ -8,14 +8,15 @@ from aiogram.types import Message
 from tortoise.expressions import Q
 
 # Внутренние модули
-from dispatcher import dispatcher
+from dispatcher import dispatcher, bot_async
 from .types import Context, Filter
-from .tools import list_to_keyboard, handler_result
+from .tools import list_to_keyboard, handler_result, mailing
 from .tools import add, delete, subscribe, back
+from .tools import cmd_mailing, cmd_mailing_student_classes, cmd_mailing_teachers
 from .schedule import get_parallel_and_symbol_by_text
 from .schedule import get_student_class_buttons
 from .schedule import all_student_class_variants
-from models import StudentClassSubscribe, StudentClass
+from models import StudentClassSubscribe, StudentClass, User, TeacherSubscribe
 from modules import b
 
 subscribe_screen = 'subscribe'
@@ -103,3 +104,25 @@ async def delete_handler(msg: Message, ctx: Context):
     subscribe.deleted = datetime.now()
     await subscribe.save()
     return handler_result(delete_handler, await to_subscribe(msg, ctx, b('Вы успешно отписались')))
+
+@dispatcher.message(Filter(admin=True, 
+    pattern=f'^({cmd_mailing}|{cmd_mailing_teachers}|{cmd_mailing_student_classes}).*'))
+async def mailing_handler(msg: Message, ctx: Context):
+    if cmd_mailing_teachers in ctx.message.text:
+        text = ctx.message.text.replace(cmd_mailing_teachers, '').strip()
+        text = b('Рассылка учителям:\n\n') + text
+        user_ids = await TeacherSubscribe.filter_all().values_list('user_id', flat=True)
+    elif cmd_mailing_student_classes in ctx.message.text:
+        text = ctx.message.text.replace(cmd_mailing_student_classes, '').strip()
+        text = b('Рассылка ученикам:\n\n') + text
+        user_ids = await StudentClassSubscribe.filter_all().values_list('user_id', flat=True)
+    else:
+        text = ctx.message.text.replace(cmd_mailing, '').strip()
+        text = b('Общая рассылка:\n\n') + text
+        user_ids = await User.filter().values_list('id', flat=True)
+    if not text:
+        await msg.reply(answer := b('Нет сообщения для рассылки!'))
+        return handler_result(mailing_handler, answer)
+    await mailing(text, user_ids, bot_async)
+    await msg.reply(answer := b(f'Отправлено сообщений: {len(user_ids)}'))
+    return handler_result(mailing_handler, answer)
