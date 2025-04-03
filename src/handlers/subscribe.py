@@ -108,21 +108,21 @@ async def delete_handler(msg: Message, ctx: Context):
 @dispatcher.message(Filter(admin=True, 
     pattern=f'^({cmd_mailing}|{cmd_mailing_teachers}|{cmd_mailing_student_classes}).*'))
 async def mailing_handler(msg: Message, ctx: Context):
-    if cmd_mailing_teachers in ctx.message.text:
-        text = ctx.message.text.replace(cmd_mailing_teachers, '').strip()
-        text = b('Рассылка учителям:\n\n') + text
-        user_ids = await TeacherSubscribe.filter_all().values_list('user_id', flat=True)
-    elif cmd_mailing_student_classes in ctx.message.text:
-        text = ctx.message.text.replace(cmd_mailing_student_classes, '').strip()
-        text = b('Рассылка ученикам:\n\n') + text
-        user_ids = await StudentClassSubscribe.filter_all().values_list('user_id', flat=True)
-    else:
-        text = ctx.message.text.replace(cmd_mailing, '').strip()
-        text = b('Общая рассылка:\n\n') + text
-        user_ids = await User.filter().values_list('id', flat=True)
+    text = ctx.message.text.replace(cmd_mailing_teachers, '').strip()
+    text = ctx.message.text.replace(cmd_mailing_student_classes, '').strip()
+    text = ctx.message.text.replace(cmd_mailing, '').strip()
     if not text:
         await msg.reply(answer := b('Нет сообщения для рассылки!'))
         return handler_result(mailing_handler, answer)
+    if cmd_mailing_teachers in ctx.message.text:
+        text = b('Рассылка учителям:\n\n') + text
+        user_ids = await TeacherSubscribe.filter_all().values_list('user_id', flat=True)
+    elif cmd_mailing_student_classes in ctx.message.text:
+        text = b('Рассылка ученикам:\n\n') + text
+        user_ids = await StudentClassSubscribe.filter_all().values_list('user_id', flat=True)
+    else:
+        text = b('Общая рассылка:\n\n') + text
+        user_ids = await User.filter().values_list('id', flat=True)
     await mailing(text, user_ids, bot_async)
     await msg.reply(answer := b(f'Отправлено сообщений: {len(user_ids)}'))
     return handler_result(mailing_handler, answer)

@@ -2,6 +2,7 @@
 
 # Внешние модули
 from aiogram import Bot, Dispatcher
+from aiogram.types import BotCommand
 from aiogram.client.default import DefaultBotProperties
 from telebot import TeleBot
 from loguru import logger
@@ -23,6 +24,12 @@ bot_info = {
 
 # Процедура при запуске
 async def on_startup() -> None:
+    from handlers.tools.buttons import cmd_start, cmd_menu
+    cmds = [
+        BotCommand(command=cmd_start, description='Запуск бота'),
+        BotCommand(command=cmd_menu, description='Переход в меню'),
+    ]
+    await bot_async.set_my_commands(cmds)
     logger.info({
         'event': 'START_BOT_POLLING', 
         'bot': bot_info

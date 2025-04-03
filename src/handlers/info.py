@@ -41,11 +41,9 @@ async def info_handler(msg: Message, ctx: Context):
         f'- {b(cmd_menu)} - Перейти в меню\n'
         f'- {b("КлассБуква ДеньНедели")} (10а вторник) - '
         'Узнать расписание сразу на нужный класс и день (всю неделю)')
-    from loguru import logger
-    logger.info({'id': ctx.user.id, 'admins': BOT_ADMINS})
     if ctx.user.id in BOT_ADMINS:
         text = (
-            b('Команды админа (видит только админы):\n')
+            b('Команды админа (видят и могут использовать только админы):\n')
             +f'- {b(cmd_new_rings)} - Обновить раписание звонков '
             +f'(на каждой строке время начала и время окончания, например {pre("08:20-09:00")})\n'
             +f'- {b(cmd_new_holidays)} - Обновить расписание каникул '
