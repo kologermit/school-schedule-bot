@@ -16,7 +16,8 @@ menu_keyboard = list_to_keyboard([
     [schedule, rings, holidays],
     [info, weather, subscribe],
 ])
-    
+
+@dispatcher.message(Filter(screen='start'))
 @dispatcher.message(Filter(text_list=[menu, cmd_menu, cmd_start]))
 async def to_menu(msg: Message, ctx: Context, answer=None):
     ctx.user.screen = menu_screen
