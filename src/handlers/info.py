@@ -22,6 +22,7 @@ from .tools import (
     cmd_teacher_subscribe,
     cmd_teachet_unsubscribe,
     cmd_reset_teacher_schedule,
+    cmd_stats,
 )
 from modules import b, pre
 from config import BOT_ADMINS
@@ -55,6 +56,7 @@ async def info_handler(msg: Message, ctx: Context):
             +f'- {b(cmd_mailing)} - Рассылка сообщения всем пользователям\n'
             +f'- {b(cmd_mailing_teachers)} - Рассылка всем подписанным на учителей\n'
             +f'- {b(cmd_mailing_student_classes)} - Рассылка всем подписанным на расписание классов\n'
+            +f'- {b(cmd_stats)} - Получние статистики по боту\n'
             +b('\nСкрытые команды (могут использовать все):\n')
             +f'- {b(cmd_teacher)} ФАМИЛИЯ ДЕНЬ_НЕДЕЛИ - получить расписание учителя. '
             +'Если не введен день недели, то будет показано расписание на всю неделю\n'

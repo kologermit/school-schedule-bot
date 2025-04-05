@@ -23,8 +23,8 @@ async def get_user_by_msg(msg: Message) -> User:
     if (user := await User.filter(id=msg.from_user.id).first()) is None:
         async with user_locks.get(msg.from_user.id, Lock()):
             user = await User.create(
-                id=msg.from_user.id,
-                name=msg.from_user.full_name,
+                id=str(msg.from_user.id),
+                name=str(msg.from_user.full_name),
                 screen='start',
             )
             logger.info({

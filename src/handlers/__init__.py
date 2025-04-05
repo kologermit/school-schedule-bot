@@ -7,4 +7,5 @@ from .rings import *
 from .holidays import *
 from .weather import *
 from .teacher import *
+from .admin import *
 from .not_found import *
