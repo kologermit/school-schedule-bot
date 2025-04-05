@@ -8,7 +8,7 @@ from dispatcher import dispatcher, bot_async
 from .types import Context, Filter
 from .tools import handler_result, mailing
 from .tools import cmd_mailing, cmd_mailing_student_classes, cmd_mailing_teachers, cmd_stats
-from models import StudentClassSubscribe, User, TeacherSubscribe, Message
+from models import StudentClassSubscribe, User, TeacherSubscribe, Teacher, StudentClass, Message
 from modules import b
 from config import BOT_ADMINS
 
@@ -40,12 +40,15 @@ async def mailing_handler(msg: TGMessage, ctx: Context):
 async def stats(msg: TGMessage, ctx: Context):
     now = datetime.now()
     await msg.reply(answer := '\n'.join(f'{b(key)}: {value}' for key, value in {
+        'Админ': f'{ctx.user.name} ({ctx.user.id})', 
         'Пользователей': await User.all().count(),
+        'Классов': await StudentClass.filter_all().count(),
+        'Учителей': await Teacher.filter_all().count(),
         'Подписок учителей': await TeacherSubscribe.filter_all().count(),
         'Подписок классов': await StudentClassSubscribe.filter_all().count(),
-        'Сообщений на 24ч': await Message.filter(created__gte=now-timedelta(days=1)).count(),
-        'Сообщений на 7 дней': await Message.filter(created__gte=now-timedelta(days=7)).count(),
-        'Сообщений на 30 дней': await Message.filter(created__gte=now-timedelta(days=30)).count(),
+        'Сообщений за 24ч': await Message.filter(created__gte=now-timedelta(days=1)).count(),
+        'Сообщений за 7 дней': await Message.filter(created__gte=now-timedelta(days=7)).count(),
+        'Сообщений за 30 дней': await Message.filter(created__gte=now-timedelta(days=30)).count(),
         'Админы': BOT_ADMINS,
     }.items()))
     return handler_result(stats, answer)
