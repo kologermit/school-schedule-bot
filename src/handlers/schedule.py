@@ -195,9 +195,9 @@ async def update_schedule(msg: Message, ctx: Context):
                 value2 = str(sheet.cell(x+i*2+2, y).value).strip()
             except IndexError:
                 continue
-            if len(value1) > 4:
+            if len(value1) > 3:
                 schedule_list[-1] = value1
-            if len(value2) > 4:
+            if len(value2) > 3:
                 schedule_list[-1] = value2
         schedule_list = [
             (lesson if lesson else '-') 

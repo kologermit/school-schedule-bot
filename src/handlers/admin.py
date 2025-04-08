@@ -49,6 +49,6 @@ async def stats(msg: TGMessage, ctx: Context):
         'Сообщений за 24ч': await Message.filter(created__gte=now-timedelta(days=1)).count(),
         'Сообщений за 7 дней': await Message.filter(created__gte=now-timedelta(days=7)).count(),
         'Сообщений за 30 дней': await Message.filter(created__gte=now-timedelta(days=30)).count(),
-        'Админы': BOT_ADMINS,
+        'Админы': '\n'.join(f'{b(u.id)}: {u.name}' for u in await User.filter(id__in=BOT_ADMINS)),
     }.items()))
     return handler_result(stats, answer)
