@@ -123,6 +123,8 @@ async def filter_cmd_send_schedule(msg: Message, **_) -> bool:
 async def cmd_send_result(msg: Message, ctx: Context):
     split = ctx.message.text.upper().split(' ')
     parallel, symbol = get_parallel_and_symbol_by_text(split[0])
+    if ctx.user.tmp_data is None:
+        ctx.user.tmp_data = {}
     ctx.user.tmp_data[schedule_screen] = {'parallel': parallel, 'symbol': symbol}
     return handler_result(cmd_send_result, await send_schedule(msg, ctx, ' '.join(split[1:])))
     
